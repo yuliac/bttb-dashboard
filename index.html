@@ -74,12 +74,13 @@
     gap: 8px 20px; font-size: 13px; color: var(--text);
   }
   .compare-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 14px;
   }
   .compare-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 10px;
     padding: 16px 20px;
+    display: flex; flex-direction: column;
   }
   .compare-card h4 {
     margin: 0 0 12px; font-size: 13px; font-weight: 600;
@@ -112,6 +113,7 @@
     body { padding: 12px; }
     h1 { font-size: 18px; }
     .kpi .value { font-size: 22px; }
+    .compare-grid { grid-template-columns: repeat(2, 1fr); }
     .compare-card .era-value { font-size: 22px; }
     .card .chart { height: 280px; min-width: 260px; }
     .controls { width: 100%; }
@@ -120,6 +122,7 @@
   @media (max-width: 480px) {
     body { padding: 8px; }
     .kpis { grid-template-columns: repeat(2, 1fr); }
+    .compare-grid { grid-template-columns: 1fr; }
     .card { padding: 10px 12px; }
     .card .chart { height: 240px; }
   }
@@ -723,4 +726,3 @@ load();
 </script>
 </body>
 </html>
-

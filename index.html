@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · Engagement Dashboard</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root {
+    --brand: #2563eb;
+    --accent: #10b981;
+    --warn: #dc2626;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+  h1 { margin: 0; font-size: 22px; font-weight: 700; }
+  h2 { margin: 24px 0 12px; font-size: 15px; font-weight: 600;
+       text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  label { font-size: 13px; color: var(--muted); margin-right: 4px; }
+  input[type="date"], select, button {
+    border: 1px solid var(--border); background: white; border-radius: 6px;
+    padding: 7px 10px; font-size: 13px; color: var(--text);
+    font-family: inherit;
+  }
+  button {
+    cursor: pointer; background: var(--brand); color: white; border-color: var(--brand);
+    font-weight: 500;
+  }
+  button:hover { filter: brightness(1.05); }
+  button.ghost { background: white; color: var(--text); border-color: var(--border); }
+  .kpis {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .kpi {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi .label { font-size: 12px; color: var(--muted); text-transform: uppercase;
+                letter-spacing: 0.04em; }
+  .kpi .value { font-size: 26px; font-weight: 700; margin-top: 4px; }
+  .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; overflow-x: auto;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); }
+  .card .chart { height: 320px; min-width: 300px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; text-transform: uppercase;
+       letter-spacing: 0.04em; font-size: 11px; white-space: nowrap; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .legend-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 8px 20px; font-size: 13px; color: var(--text);
+  }
+  .compare-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 14px;
+  }
+  .compare-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .compare-card h4 {
+    margin: 0 0 12px; font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .compare-card .era-label { font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.04em; margin-bottom: 2px; }
+  .compare-card .era-value { font-size: 26px; font-weight: 700; }
+  .compare-card .era-row { display: flex; gap: 20px; margin-top: 6px; flex-wrap: wrap; }
+  .compare-card .delta { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .delta.up { color: var(--accent); }
+  .delta.down { color: var(--warn); }
+  .program-tag {
+    display: inline-block; background: #eff6ff; color: #1e40af;
+    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    margin-right: 8px; min-width: 50px; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .meta { font-size: 12px; color: var(--muted); }
+  .err { color: var(--warn); padding: 12px; }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wkd-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wkd-table th { font-size: 12px; padding: 10px 12px; }
+  .wkd-table td { padding: 10px 12px; font-variant-numeric: tabular-nums; }
+  .wkd-table td.num { text-align: right; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    h1 { font-size: 18px; }
+    .kpi .value { font-size: 22px; }
+    .compare-card .era-value { font-size: 22px; }
+    .card .chart { height: 280px; min-width: 260px; }
+    .controls { width: 100%; }
+    .controls input, .controls select, .controls button { flex: 1; min-width: 0; }
+  }
+  @media (max-width: 480px) {
+    body { padding: 8px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .card { padding: 10px 12px; }
+    .card .chart { height: 240px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BTTB.ai · Engagement Dashboard</h1>
+  <div class="controls">
+    <label for="from">From</label><input type="date" id="from" />
+    <label for="to">To</label><input type="date" id="to" />
+    <select id="preset">
+      <option value="all">All time</option>
+      <option value="30">Last 30 days</option>
+      <option value="14">Last 14 days</option>
+      <option value="7">Last 7 days</option>
+    </select>
+    <button id="refresh">Refresh</button>
+  </div>
+</header>
+<div class="meta" id="meta">Loading…</div>
+
+<div class="kpis" id="kpis"></div>
+
+<h2>Engagement</h2>
+<div class="grid">
+  <div class="card"><h3>Daily active users</h3><div id="chart-dau" class="chart"></div></div>
+  <div class="card"><h3>Daily video sessions</h3><div id="chart-videos" class="chart"></div></div>
+  <div class="card"><h3>Video completion funnel</h3><div id="chart-funnel" class="chart"></div></div>
+  <div class="card"><h3>AI messages per day</h3><div id="chart-ai" class="chart"></div></div>
+</div>
+
+<h2>Playlist change impact — before vs after March 30</h2>
+<div id="era-compare"></div>
+<div class="grid" style="margin-top: 14px;">
+  <div class="card"><h3>Videos per active user per day</h3><div id="chart-depth" class="chart"></div></div>
+  <div class="card"><h3>Daily completion rate</h3><div id="chart-completion-trend" class="chart"></div></div>
+</div>
+
+<h2>Playlist depth — how deep do users go?</h2>
+<div class="grid">
+  <div class="card"><h3>Users by videos started per day (since playlist launch)</h3><div id="chart-depth-dist" class="chart"></div></div>
+  <div class="card"><h3>Completion rate by depth</h3><div id="chart-depth-completion" class="chart"></div></div>
+</div>
+
+<h2>Weekday vs weekend</h2>
+<div class="grid">
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Engagement by day type (since playlist launch)</h3>
+    <div id="table-daytype"></div>
+  </div>
+  <div class="card"><h3>Videos per user — weekday vs weekend</h3><div id="chart-daytype-vpu" class="chart"></div></div>
+  <div class="card"><h3>Completion rate — weekday vs weekend</h3><div id="chart-daytype-cr" class="chart"></div></div>
+</div>
+
+<h2>Program performance</h2>
+<div class="grid">
+  <div class="card"><h3>Starts &amp; completion rate by program</h3><div id="chart-program-bars" class="chart"></div></div>
+  <div class="card"><h3>Program share of total starts</h3><div id="chart-program-pie" class="chart"></div></div>
+  <div class="card" style="grid-column: 1 / -1;"><h3>Daily starts by program</h3><div id="chart-program-trend" class="chart" style="height: 380px;"></div></div>
+</div>
+
+<h2>Program performance — since BBD launch (March 16)</h2>
+<p class="note">BBD (Back to the Bible Daily) podcast started March 16, 2026. This section compares all programs from that date forward on equal footing.</p>
+<div class="grid">
+  <div class="card"><h3>Starts &amp; completion since Mar 16</h3><div id="chart-bbd-bars" class="chart"></div></div>
+  <div class="card"><h3>Program share since Mar 16</h3><div id="chart-bbd-pie" class="chart"></div></div>
+</div>
+
+<h2>Users</h2>
+<div class="grid">
+  <div class="card"><h3>New signups per day</h3><div id="chart-signups" class="chart"></div></div>
+  <div class="card"><h3>Spiritual level distribution (P1–P4)</h3><div id="chart-levels" class="chart"></div></div>
+</div>
+
+<h2>Content</h2>
+<div class="grid">
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Program legend</h3>
+    <div class="legend-grid">
+      <div><span class="program-tag">SFT</span> Spiritually Fit Today</div>
+      <div><span class="program-tag">L2HC</span> Level 2 (P2) Bible Knowledge</div>
+      <div><span class="program-tag">SGE</span> Spiritual Growth Encouragers</div>
+      <div><span class="program-tag">WTD</span> Win Today</div>
+      <div><span class="program-tag">DPG</span> Daily Prayer</div>
+      <div><span class="program-tag">BBD</span> Back to the Bible Daily <span class="meta">(launched Mar 16)</span></div>
+      <div><span class="program-tag">WBC</span> Weekend Bible Class</div>
+      <div><span class="program-tag">A&amp;S</span> Alive &amp; Sober</div>
+    </div>
+  </div>
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Top videos by starts</h3>
+    <div id="table-videos" style="overflow-x: auto;"></div>
+  </div>
+</div>
+
+<script>
+const URL_  = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+const BRAND = "#2563eb", ACCENT = "#10b981", WARN = "#dc2626", MUTED = "#9ca3af";
+const fmt = n => Number(n).toLocaleString();
+const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
+
+const PROG_COLORS = {
+  SFT: "#2563eb", L2HC: "#10b981", SGE: "#f59e0b", WTD: "#8b5cf6",
+  DPG: "#ec4899", BBD: "#06b6d4", WBC: "#ef4444", L34HC: "#6b7280",
+  L1HC: "#a3a3a3", SFW: "#d4d4d4",
+};
+
+async function api(view, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${view}: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+function setKPIs(items) {
+  document.getElementById("kpis").innerHTML = items.map(k =>
+    `<div class="kpi"><div class="label">${k.label}</div>
+       <div class="value">${k.value}</div>
+       ${k.sub ? `<div class="sub">${k.sub}</div>` : ""}</div>`).join("");
+}
+
+const layout = (extra = {}) => ({
+  margin: { l: 50, r: 30, t: 30, b: 50 },
+  paper_bgcolor: "white", plot_bgcolor: "white",
+  font: { family: "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui", size: 12 },
+  xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: 11 },
+           tickangle: -30, automargin: true },
+  yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: 11 },
+           automargin: true },
+  showlegend: false,
+  ...extra,
+});
+const config = { displayModeBar: false, responsive: true };
+
+function pivotLine(pivotDate, label) {
+  return {
+    shapes: [{ type: "line", x0: pivotDate, x1: pivotDate, y0: 0, y1: 1, yref: "paper",
+               line: { color: WARN, width: 2, dash: "dash" } }],
+    annotations: [{ x: pivotDate, y: 1.05, yref: "paper", text: label,
+                    showarrow: false, font: { size: 11, color: WARN },
+                    yanchor: "bottom", xanchor: "left" }],
+  };
+}
+
+async function load() {
+  const meta = document.getElementById("meta");
+  meta.textContent = "Loading…";
+
+  const fromVal = document.getElementById("from").value;
+  const toVal = document.getElementById("to").value;
+  const dq = [];
+  if (fromVal) dq.push(`day=gte.${fromVal}`);
+  if (toVal)   dq.push(`day=lte.${toVal}`);
+  const sq = [];
+  if (fromVal) sq.push(`signup_day=gte.${fromVal}`);
+  if (toVal)   sq.push(`signup_day=lte.${toVal}`);
+
+  try {
+    const [daily, signups, videos, levels, progDaily, depth, programs, plDepth, daytype] = await Promise.all([
+      api("vw_daily_engagement", `${dq.join("&")}&order=day.asc&limit=10000`),
+      api("vw_daily_signups",    `${sq.join("&")}&order=signup_day.asc&limit=10000`),
+      api("vw_video_engagement", "order=starts.desc&limit=200"),
+      api("vw_user_levels",      "order=p_level.asc&limit=20"),
+      api("vw_daily_program_engagement", `${dq.join("&")}&order=day.asc&limit=50000`),
+      api("vw_daily_content_depth", `${dq.join("&")}&order=day.asc&limit=10000`),
+      api("vw_program_engagement", "order=starts.desc&limit=50"),
+      api("vw_daily_playlist_depth", `day=gte.2026-03-30&order=day.asc,depth_bucket.asc&limit=50000`),
+      api("vw_daily_daytype", `day=gte.2026-03-30&order=day.asc&limit=10000`),
+    ]);
+
+    if (!daily.length) {
+      meta.innerHTML = '<span class="err">No data in the selected window.</span>';
+      return;
+    }
+
+    // KPIs
+    const totalSignups = signups.reduce((s, r) => s + r.signups, 0);
+    const totalStarts = daily.reduce((s, r) => s + r.video_starts, 0);
+    const totalCompletes = daily.reduce((s, r) => s + r.video_completes, 0);
+    const totalAi = daily.reduce((s, r) => s + r.ai_messages, 0);
+    const avgDau = (daily.reduce((s, r) => s + r.active_users, 0) / daily.length).toFixed(1);
+    const peak = daily.reduce((a, b) => b.active_users > a.active_users ? b : a, daily[0]);
+    const completionRate = pct(totalCompletes, totalStarts);
+
+    setKPIs([
+      { label: "Signups",            value: fmt(totalSignups) },
+      { label: "Avg DAU",            value: avgDau, sub: `${daily.length} days` },
+      { label: "Peak DAU",           value: fmt(peak.active_users), sub: peak.day },
+      { label: "Video starts",       value: fmt(totalStarts) },
+      { label: "Completion rate",    value: `${completionRate}%`, sub: `${fmt(totalCompletes)} of ${fmt(totalStarts)}` },
+      { label: "AI messages",        value: fmt(totalAi) },
+    ]);
+
+    meta.textContent =
+      `${daily[0].day} → ${daily[daily.length-1].day} · ${daily.length} days`;
+
+    // DAU
+    Plotly.newPlot("chart-dau", [{
+      x: daily.map(r => r.day), y: daily.map(r => r.active_users),
+      type: "scatter", mode: "lines", fill: "tozeroy",
+      line: { color: BRAND, width: 2.4 }, fillcolor: "rgba(37,99,235,0.12)",
+      hovertemplate: "%{x|%b %d}<br>%{y} active users<extra></extra>",
+    }], layout(), config);
+
+    // Video sessions
+    Plotly.newPlot("chart-videos", [
+      { x: daily.map(r => r.day), y: daily.map(r => r.video_starts),
+        type: "bar", name: "Starts", marker: { color: BRAND } },
+      { x: daily.map(r => r.day), y: daily.map(r => r.video_completes),
+        type: "bar", name: "Completed", marker: { color: ACCENT } },
+    ], layout({ barmode: "overlay", showlegend: true,
+                legend: { orientation: "h", y: 1.1, x: 0 } }), config);
+
+    // Funnel
+    const fStarts = daily.reduce((s,r)=>s+r.video_starts, 0);
+    const stages = [
+      ["Started", fStarts],
+      ["25 %",    daily.reduce((s,r)=>s+r.video_25, 0)],
+      ["50 %",    daily.reduce((s,r)=>s+r.video_50, 0)],
+      ["75 %",    daily.reduce((s,r)=>s+r.video_75, 0)],
+      ["100 %",   daily.reduce((s,r)=>s+r.video_completes, 0)],
+    ];
+    const fLabels = stages.map(([, count]) =>
+      `${fmt(count)} (${pct(count, fStarts)}%)`);
+    Plotly.newPlot("chart-funnel", [{
+      type: "bar", orientation: "h",
+      y: stages.map(s => s[0]).reverse(),
+      x: stages.map(s => s[1]).reverse(),
+      text: fLabels.reverse(), textposition: "outside",
+      cliponaxis: false,
+      marker: { color: [ACCENT, "#34d399", "#60a5fa", "#3b82f6", BRAND].reverse() },
+      hovertemplate: "%{y}<br>%{x:,} sessions<extra></extra>",
+    }], layout({
+      margin: { l: 70, r: 100, t: 10, b: 40 },
+      xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280" }, title: "Sessions",
+               automargin: true, tickangle: 0 },
+      yaxis: { tickfont: { color: "#111", size: 12 }, automargin: true },
+    }), config);
+
+    // AI messages
+    Plotly.newPlot("chart-ai", [{
+      x: daily.map(r => r.day), y: daily.map(r => r.ai_messages),
+      type: "bar", marker: { color: "#8b5cf6" },
+      hovertemplate: "%{x|%b %d}<br>%{y} messages<extra></extra>",
+    }], layout(), config);
+
+    // === BEFORE vs AFTER MARCH 30 ===
+    const PIVOT = "2026-03-30";
+    const before = depth.filter(r => r.day < PIVOT);
+    const after  = depth.filter(r => r.day >= PIVOT);
+    const avg = (arr, key) => arr.length ? (arr.reduce((s, r) => s + Number(r[key] || 0), 0) / arr.length) : 0;
+
+    const bVPU = avg(before, "videos_per_user").toFixed(2);
+    const aVPU = avg(after, "videos_per_user").toFixed(2);
+    const bCR  = avg(before, "completion_pct").toFixed(1);
+    const aCR  = avg(after, "completion_pct").toFixed(1);
+    const bStarts = before.reduce((s, r) => s + Number(r.total_starts), 0);
+    const aStarts = after.reduce((s, r) => s + Number(r.total_starts), 0);
+    const bStartsPerDay = before.length ? (bStarts / before.length).toFixed(0) : 0;
+    const aStartsPerDay = after.length ? (aStarts / after.length).toFixed(0) : 0;
+
+    const deltaPct = (a, b) => {
+      const d = b > 0 ? Math.round(100 * (a - b) / b) : 0;
+      return d >= 0 ? `<span class="delta up">+${d}%</span>` : `<span class="delta down">${d}%</span>`;
+    };
+
+    document.getElementById("era-compare").innerHTML = `
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4>Videos per active user / day</h4>
+          <div class="era-row">
+            <div><div class="era-label">Before (single video)</div>
+              <div class="era-value">${bVPU}</div>
+              <div class="meta">${before.length} days</div></div>
+            <div><div class="era-label">After (playlist choice)</div>
+              <div class="era-value" style="color:var(--accent)">${aVPU}</div>
+              <div class="meta">${after.length} days</div></div>
+          </div>
+          ${deltaPct(aVPU, bVPU)}
+        </div>
+        <div class="compare-card">
+          <h4>Avg completion rate</h4>
+          <div class="era-row">
+            <div><div class="era-label">Before</div>
+              <div class="era-value">${bCR}%</div></div>
+            <div><div class="era-label">After</div>
+              <div class="era-value" style="color:var(--accent)">${aCR}%</div></div>
+          </div>
+          ${deltaPct(aCR, bCR)}
+        </div>
+        <div class="compare-card">
+          <h4>Avg daily video starts</h4>
+          <div class="era-row">
+            <div><div class="era-label">Before</div>
+              <div class="era-value">${bStartsPerDay}</div></div>
+            <div><div class="era-label">After</div>
+              <div class="era-value" style="color:var(--accent)">${aStartsPerDay}</div></div>
+          </div>
+          ${deltaPct(aStartsPerDay, bStartsPerDay)}
+        </div>
+        <div class="compare-card">
+          <h4>Total video starts</h4>
+          <div class="era-row">
+            <div><div class="era-label">Before (${before.length}d)</div>
+              <div class="era-value">${fmt(bStarts)}</div></div>
+            <div><div class="era-label">After (${after.length}d)</div>
+              <div class="era-value" style="color:var(--accent)">${fmt(aStarts)}</div></div>
+          </div>
+          ${deltaPct(aStarts / Math.max(after.length,1), bStarts / Math.max(before.length,1))}
+        </div>
+      </div>`;
+
+    // Videos per user trend
+    Plotly.newPlot("chart-depth", [{
+      x: depth.map(r => r.day), y: depth.map(r => r.videos_per_user),
+      type: "scatter", mode: "lines+markers",
+      line: { color: BRAND, width: 2.4 }, marker: { size: 4 },
+      hovertemplate: "%{x|%b %d}<br>%{y:.1f} videos/user<extra></extra>",
+    }], layout({ margin: { l: 50, r: 30, t: 40, b: 50 }, ...pivotLine(PIVOT, "Mar 30") }), config);
+
+    // Completion rate trend
+    Plotly.newPlot("chart-completion-trend", [{
+      x: depth.map(r => r.day), y: depth.map(r => r.completion_pct),
+      type: "scatter", mode: "lines+markers",
+      line: { color: ACCENT, width: 2.4 }, marker: { size: 4 },
+      hovertemplate: "%{x|%b %d}<br>%{y:.1f}%<extra></extra>",
+    }], layout({
+      margin: { l: 50, r: 30, t: 40, b: 50 },
+      yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280" }, ticksuffix: "%", automargin: true },
+      ...pivotLine(PIVOT, "Mar 30"),
+    }), config);
+
+    // === PLAYLIST DEPTH ===
+    const depthBuckets = [1, 2, 3, 4, 5, 6, 7];
+    const bucketLabels = ["1 video", "2 videos", "3 videos", "4 videos", "5 videos", "6 videos", "7+"];
+    const bucketColors = ["#ef4444", "#f59e0b", "#eab308", "#84cc16", "#22c55e", "#10b981", "#059669"];
+
+    const depthTotals = depthBuckets.map(b => {
+      const rows = plDepth.filter(r => r.depth_bucket === b);
+      return rows.reduce((s, r) => s + r.users, 0);
+    });
+    const depthGrand = depthTotals.reduce((a, b) => a + b, 0);
+
+    Plotly.newPlot("chart-depth-dist", [{
+      x: bucketLabels, y: depthTotals, type: "bar",
+      marker: { color: bucketColors },
+      text: depthTotals.map(v => `${fmt(v)} (${(100*v/depthGrand).toFixed(1)}%)`),
+      textposition: "outside", cliponaxis: false,
+      hovertemplate: "%{x}<br>%{y:,} user-days<extra></extra>",
+    }], layout({
+      margin: { l: 50, r: 30, t: 30, b: 60 },
+      xaxis: { tickangle: 0, automargin: true, tickfont: { size: 12 } },
+      yaxis: { title: "User-days", automargin: true },
+    }), config);
+
+    const depthCR = depthBuckets.map(b => {
+      const rows = plDepth.filter(r => r.depth_bucket === b);
+      const totalUsers = rows.reduce((s, r) => s + r.users, 0);
+      const weightedCR = rows.reduce((s, r) => s + r.avg_completion_pct * r.users, 0);
+      return totalUsers > 0 ? (weightedCR / totalUsers).toFixed(1) : 0;
+    });
+
+    Plotly.newPlot("chart-depth-completion", [{
+      x: bucketLabels, y: depthCR, type: "bar",
+      marker: { color: bucketColors },
+      text: depthCR.map(v => `${v}%`), textposition: "outside", cliponaxis: false,
+      hovertemplate: "%{x}<br>%{y:.1f}% completion<extra></extra>",
+    }], layout({
+      margin: { l: 50, r: 30, t: 30, b: 60 },
+      xaxis: { tickangle: 0, automargin: true, tickfont: { size: 12 } },
+      yaxis: { title: "Completion rate", ticksuffix: "%", range: [0, 100], automargin: true },
+    }), config);
+
+    // === WEEKDAY VS WEEKEND ===
+    const wkd = daytype.filter(r => r.day_type === "Weekday");
+    const wke = daytype.filter(r => r.day_type === "Weekend");
+    const dtAvg = (arr, key) => arr.length ? (arr.reduce((s, r) => s + Number(r[key] || 0), 0) / arr.length) : 0;
+
+    document.getElementById("table-daytype").innerHTML = `
+      <table class="wkd-table">
+        <thead><tr>
+          <th>Metric</th><th class="num">Weekday (${wkd.length} days)</th>
+          <th class="num">Weekend (${wke.length} days)</th><th class="num">Difference</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Avg DAU</td><td class="num">${dtAvg(wkd,"active_users").toFixed(1)}</td>
+            <td class="num">${dtAvg(wke,"active_users").toFixed(1)}</td>
+            <td class="num">${deltaPct(dtAvg(wke,"active_users"), dtAvg(wkd,"active_users"))}</td></tr>
+          <tr><td>Avg daily starts</td><td class="num">${dtAvg(wkd,"starts").toFixed(1)}</td>
+            <td class="num">${dtAvg(wke,"starts").toFixed(1)}</td>
+            <td class="num">${deltaPct(dtAvg(wke,"starts"), dtAvg(wkd,"starts"))}</td></tr>
+          <tr><td>Avg daily completes</td><td class="num">${dtAvg(wkd,"completes").toFixed(1)}</td>
+            <td class="num">${dtAvg(wke,"completes").toFixed(1)}</td>
+            <td class="num">${deltaPct(dtAvg(wke,"completes"), dtAvg(wkd,"completes"))}</td></tr>
+          <tr><td>Videos per user</td><td class="num">${dtAvg(wkd,"vids_per_user").toFixed(2)}</td>
+            <td class="num">${dtAvg(wke,"vids_per_user").toFixed(2)}</td>
+            <td class="num">${deltaPct(dtAvg(wke,"vids_per_user"), dtAvg(wkd,"vids_per_user"))}</td></tr>
+          <tr><td>Completion rate</td><td class="num">${dtAvg(wkd,"completion_pct").toFixed(1)}%</td>
+            <td class="num">${dtAvg(wke,"completion_pct").toFixed(1)}%</td>
+            <td class="num">${deltaPct(dtAvg(wke,"completion_pct"), dtAvg(wkd,"completion_pct"))}</td></tr>
+          <tr><td>Avg AI messages</td><td class="num">${dtAvg(wkd,"ai_messages").toFixed(1)}</td>
+            <td class="num">${dtAvg(wke,"ai_messages").toFixed(1)}</td>
+            <td class="num">${deltaPct(dtAvg(wke,"ai_messages"), dtAvg(wkd,"ai_messages"))}</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Weekday playlists typically have 6 videos; weekend playlists have 4.</p>`;
+
+    // Weekday vs weekend scatter: vids per user
+    Plotly.newPlot("chart-daytype-vpu", [
+      { x: wkd.map(r => r.day), y: wkd.map(r => r.vids_per_user),
+        type: "scatter", mode: "markers", name: "Weekday",
+        marker: { color: BRAND, size: 8 },
+        hovertemplate: "%{x|%a %b %d}<br>%{y:.1f} vids/user<extra>Weekday</extra>" },
+      { x: wke.map(r => r.day), y: wke.map(r => r.vids_per_user),
+        type: "scatter", mode: "markers", name: "Weekend",
+        marker: { color: "#f59e0b", size: 8, symbol: "diamond" },
+        hovertemplate: "%{x|%a %b %d}<br>%{y:.1f} vids/user<extra>Weekend</extra>" },
+    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.1, x: 0 },
+                yaxis: { title: "Videos / user", automargin: true } }), config);
+
+    // Weekday vs weekend scatter: completion rate
+    Plotly.newPlot("chart-daytype-cr", [
+      { x: wkd.map(r => r.day), y: wkd.map(r => r.completion_pct),
+        type: "scatter", mode: "markers", name: "Weekday",
+        marker: { color: BRAND, size: 8 },
+        hovertemplate: "%{x|%a %b %d}<br>%{y:.1f}%<extra>Weekday</extra>" },
+      { x: wke.map(r => r.day), y: wke.map(r => r.completion_pct),
+        type: "scatter", mode: "markers", name: "Weekend",
+        marker: { color: "#f59e0b", size: 8, symbol: "diamond" },
+        hovertemplate: "%{x|%a %b %d}<br>%{y:.1f}%<extra>Weekend</extra>" },
+    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.1, x: 0 },
+                yaxis: { title: "Completion %", ticksuffix: "%", automargin: true } }), config);
+
+    // === PROGRAM PERFORMANCE ===
+    const mainProgs = programs.filter(p => p.starts >= 10);
+
+    Plotly.newPlot("chart-program-bars", [
+      { x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.starts),
+        type: "bar", name: "Starts", marker: { color: mainProgs.map(p => PROG_COLORS[p.program_short] || MUTED) },
+        hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>" },
+      { x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.completion_pct),
+        type: "scatter", mode: "lines+markers", name: "Completion %", yaxis: "y2",
+        line: { color: WARN, width: 2.5 }, marker: { size: 7 },
+        hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>" },
+    ], layout({
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
+      margin: { l: 50, r: 60, t: 40, b: 50 },
+      xaxis: { tickangle: 0, automargin: true },
+      yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280" }, title: "Starts", automargin: true },
+      yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],
+                tickfont: { color: WARN }, title: "Completion %", titlefont: { color: WARN }, automargin: true },
+    }), config);
+
+    Plotly.newPlot("chart-program-pie", [{
+      type: "pie", labels: mainProgs.map(p => p.program_short),
+      values: mainProgs.map(p => p.starts), hole: 0.5,
+      marker: { colors: mainProgs.map(p => PROG_COLORS[p.program_short] || MUTED) },
+      textinfo: "label+percent",
+      hovertemplate: "%{label}<br>%{value:,} starts (%{percent})<extra></extra>",
+    }], layout({ margin: { l: 20, r: 20, t: 10, b: 10 } }), config);
+
+    // Stacked area: daily starts by program
+    const progNames = [...new Set(progDaily.map(r => r.program_short))].filter(p =>
+      mainProgs.some(m => m.program_short === p));
+    const allDays = [...new Set(progDaily.map(r => r.day))].sort();
+    const progTraces = progNames.map(prog => {
+      const byDay = new Map(progDaily.filter(r => r.program_short === prog).map(r => [r.day, r.starts]));
+      return {
+        x: allDays, y: allDays.map(d => byDay.get(d) || 0),
+        type: "scatter", mode: "lines", name: prog, stackgroup: "one",
+        line: { width: 0.5 }, fillcolor: (PROG_COLORS[prog] || MUTED) + "cc",
+        marker: { color: PROG_COLORS[prog] || MUTED },
+        hovertemplate: `${prog}: %{y} starts<extra></extra>`,
+      };
+    });
+    Plotly.newPlot("chart-program-trend", progTraces, layout({
+      showlegend: true, legend: { orientation: "h", y: 1.08, x: 0 },
+      margin: { l: 50, r: 30, t: 40, b: 50 },
+      ...pivotLine(PIVOT, "Mar 30 playlist"),
+    }), config);
+
+    // === BBD LAUNCH — SINCE MARCH 16 ===
+    const BBD_DATE = "2026-03-16";
+    const progSinceBBD = progDaily.filter(r => r.day >= BBD_DATE);
+    const progTotalsBBD = {};
+    const progCompletesBBD = {};
+    progSinceBBD.forEach(r => {
+      progTotalsBBD[r.program_short] = (progTotalsBBD[r.program_short] || 0) + r.starts;
+      progCompletesBBD[r.program_short] = (progCompletesBBD[r.program_short] || 0) + r.completes;
+    });
+    const bbd_progs = Object.keys(progTotalsBBD)
+      .filter(p => progTotalsBBD[p] >= 10)
+      .sort((a, b) => progTotalsBBD[b] - progTotalsBBD[a]);
+    const bbd_starts = bbd_progs.map(p => progTotalsBBD[p]);
+    const bbd_cr = bbd_progs.map(p =>
+      progTotalsBBD[p] > 0 ? (100 * progCompletesBBD[p] / progTotalsBBD[p]).toFixed(1) : 0);
+
+    Plotly.newPlot("chart-bbd-bars", [
+      { x: bbd_progs, y: bbd_starts, type: "bar", name: "Starts",
+        marker: { color: bbd_progs.map(p => PROG_COLORS[p] || MUTED) },
+        hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>" },
+      { x: bbd_progs, y: bbd_cr, type: "scatter", mode: "lines+markers",
+        name: "Completion %", yaxis: "y2",
+        line: { color: WARN, width: 2.5 }, marker: { size: 7 },
+        hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>" },
+    ], layout({
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
+      margin: { l: 50, r: 60, t: 40, b: 50 },
+      xaxis: { tickangle: 0, automargin: true },
+      yaxis: { title: "Starts", automargin: true },
+      yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],
+                tickfont: { color: WARN }, title: "Completion %", titlefont: { color: WARN }, automargin: true },
+    }), config);
+
+    const bbd_grand = bbd_starts.reduce((a, b) => a + b, 0);
+    Plotly.newPlot("chart-bbd-pie", [{
+      type: "pie", labels: bbd_progs, values: bbd_starts, hole: 0.5,
+      marker: { colors: bbd_progs.map(p => PROG_COLORS[p] || MUTED) },
+      textinfo: "label+percent",
+      hovertemplate: "%{label}<br>%{value:,} starts (%{percent})<extra></extra>",
+    }], layout({ margin: { l: 20, r: 20, t: 10, b: 10 } }), config);
+
+    // Signups
+    Plotly.newPlot("chart-signups", [{
+      x: signups.map(r => r.signup_day), y: signups.map(r => r.signups),
+      type: "bar", marker: { color: ACCENT },
+      hovertemplate: "%{x|%b %d}<br>%{y} signups<extra></extra>",
+    }], layout(), config);
+
+    // Levels
+    Plotly.newPlot("chart-levels", [{
+      type: "pie", labels: levels.map(r => r.p_level), values: levels.map(r => r.users),
+      hole: 0.55, marker: { colors: [BRAND, ACCENT, "#f59e0b", "#ef4444", MUTED] },
+      textinfo: "label+percent",
+    }], layout({ margin: { l: 20, r: 20, t: 10, b: 10 } }), config);
+
+    // Top videos table
+    const top = videos.slice(0, 15);
+    const escape = s => String(s ?? "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmtDate = d => d ? new Date(d).toLocaleDateString("en-US",
+      { month: "short", day: "numeric", year: "numeric" }) : "—";
+    document.getElementById("table-videos").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Program</th>
+          <th>Episode</th>
+          <th>Air date</th>
+          <th class="num">Starts</th><th class="num">Viewers</th>
+          <th class="num">25%</th><th class="num">50%</th><th class="num">75%</th>
+          <th class="num">Done</th><th class="num">Rate</th>
+        </tr></thead>
+        <tbody>${top.map(v => {
+          const title = escape(v.title || v.yt_video_id);
+          const program = v.program_short
+            ? `<span class="program-tag">${escape(v.program_short)}</span>`
+            : "";
+          return `<tr>
+            <td>${program}</td>
+            <td><a href="https://www.youtube.com/watch?v=${v.yt_video_id}" target="_blank">${title}</a></td>
+            <td>${fmtDate(v.air_date)}</td>
+            <td class="num">${fmt(v.starts)}</td>
+            <td class="num">${fmt(v.unique_viewers)}</td>
+            <td class="num">${fmt(v.p25)}</td>
+            <td class="num">${fmt(v.p50)}</td>
+            <td class="num">${fmt(v.p75)}</td>
+            <td class="num">${fmt(v.completes)}</td>
+            <td class="num">${v.completion_pct ?? "—"}%</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>`;
+  } catch (e) {
+    meta.innerHTML = `<span class="err">Load failed: ${e.message}</span>`;
+    console.error(e);
+  }
+}
+
+document.getElementById("refresh").addEventListener("click", load);
+document.getElementById("from").addEventListener("change", load);
+document.getElementById("to").addEventListener("change", load);
+document.getElementById("preset").addEventListener("change", e => {
+  const v = e.target.value;
+  if (v === "all") {
+    document.getElementById("from").value = "";
+    document.getElementById("to").value = "";
+  } else {
+    const today = new Date();
+    const from = new Date(today); from.setDate(from.getDate() - parseInt(v));
+    const iso = d => d.toISOString().slice(0, 10);
+    document.getElementById("from").value = iso(from);
+    document.getElementById("to").value = iso(today);
+  }
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

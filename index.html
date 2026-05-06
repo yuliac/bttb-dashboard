@@ -79,7 +79,7 @@
   }
   .compare-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 20px;
+    padding: 20px 24px;
     display: flex; flex-direction: column;
   }
   .compare-card h4 {
@@ -398,10 +398,10 @@ async function load() {
         <div class="compare-card">
           <h4>Videos per active user / day</h4>
           <div class="era-row">
-            <div><div class="era-label">Before (single video)</div>
+            <div><div class="era-label">Before<br>(single video)</div>
               <div class="era-value">${bVPU}</div>
               <div class="meta">${before.length} days</div></div>
-            <div><div class="era-label">After (playlist choice)</div>
+            <div><div class="era-label">After<br>(playlist choice)</div>
               <div class="era-value" style="color:var(--accent)">${aVPU}</div>
               <div class="meta">${after.length} days</div></div>
           </div>
@@ -430,9 +430,9 @@ async function load() {
         <div class="compare-card">
           <h4>Total video starts</h4>
           <div class="era-row">
-            <div><div class="era-label">Before (${before.length}d)</div>
+            <div><div class="era-label">Before<br>(${before.length} days)</div>
               <div class="era-value">${fmt(bStarts)}</div></div>
-            <div><div class="era-label">After (${after.length}d)</div>
+            <div><div class="era-label">After<br>(${after.length} days)</div>
               <div class="era-value" style="color:var(--accent)">${fmt(aStarts)}</div></div>
           </div>
           ${deltaPct(aStarts / Math.max(after.length,1), bStarts / Math.max(before.length,1))}

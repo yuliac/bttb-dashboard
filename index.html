@@ -115,16 +115,23 @@
     .kpi .value { font-size: 22px; }
     .compare-grid { grid-template-columns: repeat(2, 1fr); }
     .compare-card .era-value { font-size: 22px; }
-    .card .chart { height: 280px; min-width: 260px; }
+    .card .chart { height: 300px; min-width: 0; }
     .controls { width: 100%; }
     .controls input, .controls select, .controls button { flex: 1; min-width: 0; }
+    .wkd-table { font-size: 12px; }
+    .wkd-table th { font-size: 10px; padding: 6px 4px; }
+    .wkd-table td { padding: 6px 4px; }
   }
   @media (max-width: 480px) {
     body { padding: 8px; }
     .kpis { grid-template-columns: repeat(2, 1fr); }
     .compare-grid { grid-template-columns: 1fr; }
     .card { padding: 10px 12px; }
-    .card .chart { height: 240px; }
+    .card .chart { height: 280px; }
+    .card h3 { font-size: 13px; }
+    .wkd-table { font-size: 11px; }
+    .wkd-table th { font-size: 9px; padding: 5px 3px; }
+    .wkd-table td { padding: 5px 3px; }
   }
 </style>
 </head>
@@ -158,7 +165,7 @@
 
 <h2>AI engagement</h2>
 <div class="grid">
-  <div class="card"><h3>Daily AI users &amp; adoption rate</h3><div id="chart-ai-adoption" class="chart" style="height: 400px;"></div></div>
+  <div class="card"><h3>Daily AI users &amp; adoption rate</h3><div id="chart-ai-adoption" class="chart" style="height: 380px;"></div></div>
   <div class="card"><h3>Messages per AI user per day</h3><div id="chart-ai-depth" class="chart"></div></div>
 </div>
 
@@ -254,13 +261,18 @@ function setKPIs(items) {
        ${k.sub ? `<div class="sub">${k.sub}</div>` : ""}</div>`).join("");
 }
 
+const isMobile = window.innerWidth < 600;
+const mFontSz = isMobile ? 9 : 11;
+const mTickAngle = isMobile ? -45 : -30;
+const mMargin = isMobile ? { l: 40, r: 20, t: 25, b: 55 } : { l: 50, r: 30, t: 30, b: 50 };
+
 const layout = (extra = {}) => ({
-  margin: { l: 50, r: 30, t: 30, b: 50 },
+  margin: mMargin,
   paper_bgcolor: "white", plot_bgcolor: "white",
-  font: { family: "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui", size: 12 },
-  xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: 11 },
-           tickangle: -30, automargin: true },
-  yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: 11 },
+  font: { family: "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui", size: isMobile ? 10 : 12 },
+  xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
+           tickangle: mTickAngle, automargin: true },
+  yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
            automargin: true },
   showlegend: false,
   ...extra,
@@ -393,11 +405,11 @@ async function load() {
         line: { color: "#dc2626", width: 2.5 }, marker: { size: 5 },
         hovertemplate: "%{x|%b %d}<br>%{y:.1f}% of active users<extra></extra>" },
     ], layout({
-      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
-      margin: { l: 50, r: 60, t: 40, b: 50 },
-      yaxis: { title: "AI users", automargin: true },
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0, font: { size: isMobile ? 10 : 12 } },
+      margin: { l: 45, r: isMobile ? 45 : 60, t: 40, b: 50 },
+      yaxis: { title: isMobile ? "" : "AI users", automargin: true, tickfont: { size: mFontSz } },
       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%",
-                tickfont: { color: "#dc2626" }, title: "% of DAU",
+                tickfont: { color: "#dc2626", size: mFontSz }, title: isMobile ? "" : "% of DAU",
                 titlefont: { color: "#dc2626" }, automargin: true },
     }), config);
 
@@ -513,10 +525,11 @@ async function load() {
       marker: { color: bucketColors },
       text: depthTotals.map(v => `${fmt(v)} (${(100*v/depthGrand).toFixed(1)}%)`),
       textposition: "outside", cliponaxis: false,
+      textfont: { size: isMobile ? 9 : 12 },
       hovertemplate: "%{x}<br>%{y:,} user-days<extra></extra>",
     }], layout({
-      margin: { l: 50, r: 30, t: 30, b: 60 },
-      xaxis: { tickangle: 0, automargin: true, tickfont: { size: 12 } },
+      margin: { l: 50, r: 30, t: 30, b: isMobile ? 70 : 60 },
+      xaxis: { tickangle: isMobile ? -45 : 0, automargin: true, tickfont: { size: isMobile ? 10 : 12 } },
       yaxis: { title: "User-days", automargin: true },
     }), config);
 
@@ -531,10 +544,11 @@ async function load() {
       x: bucketLabels, y: depthCR, type: "bar",
       marker: { color: bucketColors },
       text: depthCR.map(v => `${v}%`), textposition: "outside", cliponaxis: false,
+      textfont: { size: isMobile ? 9 : 12 },
       hovertemplate: "%{x}<br>%{y:.1f}% completion<extra></extra>",
     }], layout({
-      margin: { l: 50, r: 30, t: 30, b: 60 },
-      xaxis: { tickangle: 0, automargin: true, tickfont: { size: 12 } },
+      margin: { l: 50, r: 30, t: 30, b: isMobile ? 70 : 60 },
+      xaxis: { tickangle: isMobile ? -45 : 0, automargin: true, tickfont: { size: isMobile ? 10 : 12 } },
       yaxis: { title: "Completion rate", ticksuffix: "%", range: [0, 100], automargin: true },
     }), config);
 
@@ -607,12 +621,12 @@ async function load() {
         hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>" },
       { x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.completion_pct),
         type: "scatter", mode: "lines+markers", name: "Completion %", yaxis: "y2",
-        line: { color: WARN, width: 2.5 }, marker: { size: 7 },
+        line: { color: WARN, width: 2.5 }, marker: { size: isMobile ? 5 : 7 },
         hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>" },
     ], layout({
-      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
-      margin: { l: 50, r: 60, t: 40, b: 50 },
-      xaxis: { tickangle: 0, automargin: true },
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0, font: { size: isMobile ? 10 : 12 } },
+      margin: { l: 50, r: 55, t: 40, b: isMobile ? 60 : 50 },
+      xaxis: { tickangle: isMobile ? -45 : 0, automargin: true, tickfont: { size: isMobile ? 10 : 12 } },
       yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280" }, title: "Starts", automargin: true },
       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],
                 tickfont: { color: WARN }, title: "Completion %", titlefont: { color: WARN }, automargin: true },
@@ -668,12 +682,12 @@ async function load() {
         hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>" },
       { x: bbd_progs, y: bbd_cr, type: "scatter", mode: "lines+markers",
         name: "Completion %", yaxis: "y2",
-        line: { color: WARN, width: 2.5 }, marker: { size: 7 },
+        line: { color: WARN, width: 2.5 }, marker: { size: isMobile ? 5 : 7 },
         hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>" },
     ], layout({
-      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
-      margin: { l: 50, r: 60, t: 40, b: 50 },
-      xaxis: { tickangle: 0, automargin: true },
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0, font: { size: isMobile ? 10 : 12 } },
+      margin: { l: 50, r: 55, t: 40, b: isMobile ? 60 : 50 },
+      xaxis: { tickangle: isMobile ? -45 : 0, automargin: true, tickfont: { size: isMobile ? 10 : 12 } },
       yaxis: { title: "Starts", automargin: true },
       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],
                 tickfont: { color: WARN }, title: "Completion %", titlefont: { color: WARN }, automargin: true },

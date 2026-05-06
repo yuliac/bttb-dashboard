@@ -156,6 +156,12 @@
   <div class="card"><h3>AI messages per day</h3><div id="chart-ai" class="chart"></div></div>
 </div>
 
+<h2>AI engagement</h2>
+<div class="grid">
+  <div class="card"><h3>Daily AI users &amp; adoption rate</h3><div id="chart-ai-adoption" class="chart"></div></div>
+  <div class="card"><h3>Messages per AI user per day</h3><div id="chart-ai-depth" class="chart"></div></div>
+</div>
+
 <h2>Playlist change impact — before vs after March 30</h2>
 <div id="era-compare"></div>
 <div class="grid" style="margin-top: 14px;">
@@ -372,6 +378,38 @@ async function load() {
       type: "bar", marker: { color: "#8b5cf6" },
       hovertemplate: "%{x|%b %d}<br>%{y} messages<extra></extra>",
     }], layout(), config);
+
+    // === AI ENGAGEMENT ===
+    const aiUsers = daily.map(r => r.users_with_ai_msgs || 0);
+    const aiAdoptionPct = daily.map((r, i) => r.active_users > 0 ? Math.round(1000 * aiUsers[i] / r.active_users) / 10 : 0);
+    const msgsPerAiUser = daily.map((r, i) => aiUsers[i] > 0 ? Math.round(10 * r.ai_messages / aiUsers[i]) / 10 : 0);
+
+    Plotly.newPlot("chart-ai-adoption", [
+      { x: daily.map(r => r.day), y: aiUsers, type: "bar", name: "AI users",
+        marker: { color: "#8b5cf6" },
+        hovertemplate: "%{x|%b %d}<br>%{y} AI users<extra></extra>" },
+      { x: daily.map(r => r.day), y: aiAdoptionPct, type: "scatter", mode: "lines+markers",
+        name: "% of DAU", yaxis: "y2",
+        line: { color: "#f59e0b", width: 2.5 }, marker: { size: 4 },
+        hovertemplate: "%{x|%b %d}<br>%{y:.1f}% of active users<extra></extra>" },
+    ], layout({
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0 },
+      margin: { l: 50, r: 60, t: 40, b: 50 },
+      yaxis: { title: "AI users", automargin: true },
+      yaxis2: { overlaying: "y", side: "right", ticksuffix: "%",
+                tickfont: { color: "#f59e0b" }, title: "% of DAU",
+                titlefont: { color: "#f59e0b" }, automargin: true },
+    }), config);
+
+    Plotly.newPlot("chart-ai-depth", [{
+      x: daily.map(r => r.day), y: msgsPerAiUser,
+      type: "scatter", mode: "lines+markers",
+      line: { color: "#8b5cf6", width: 2.4 }, marker: { size: 5 },
+      fill: "tozeroy", fillcolor: "rgba(139,92,246,0.08)",
+      hovertemplate: "%{x|%b %d}<br>%{y:.1f} msgs/user<extra></extra>",
+    }], layout({
+      yaxis: { title: "Messages per AI user", automargin: true },
+    }), config);
 
     // === BEFORE vs AFTER MARCH 30 ===
     const PIVOT = "2026-03-30";

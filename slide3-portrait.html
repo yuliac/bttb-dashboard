@@ -38,7 +38,7 @@
 
   .main {
     flex: 75; min-height: 0;
-    padding: calc(28px * var(--s)) calc(48px * var(--s)) calc(16px * var(--s));
+    padding: calc(20px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s));
     display: flex; flex-direction: column;
     overflow: hidden;
   }
@@ -52,7 +52,7 @@
     flex: 25; min-height: 0;
     background: #f1f5f9;
     border-top: 1px solid var(--surface);
-    padding: calc(18px * var(--s)) calc(48px * var(--s));
+    padding: calc(14px * var(--s)) calc(20px * var(--s));
     display: flex; flex-direction: column;
     overflow: hidden;
   }
@@ -154,18 +154,18 @@
   .table-slide th.num { text-align: right; }
 
   .logo-bar {
-    position: fixed; top: calc(20px * var(--s)); right: calc(32px * var(--s)); z-index: 100;
-    font-size: calc(14px * var(--s)); font-weight: 700; color: var(--muted);
-    letter-spacing: 0.04em;
+    
+    font-size: calc(12px * var(--s)); font-weight: 700; color: var(--muted);
+    letter-spacing: 0.04em; margin-bottom: calc(2px * var(--s));
   }
 
 </style>
 </head>
 <body>
 
-<div class="logo-bar">BTTB.ai</div>
 <div class="slide-inner">
   <div class="main">
+    <div class="logo-bar">BTTB.ai</div>
       <h3>Playlist depth distribution &amp; completion correlation</h3>
       <div class="two-charts">
         <div id="s3-chart1"></div>
@@ -205,7 +205,7 @@ function tickFont(color) {
 }
 
 const darkLayout = (extra = {}) => ({
-  margin: { l: Math.round(55*scale), r: Math.round(30*scale), t: Math.round(30*scale), b: Math.round(55*scale) },
+  margin: { l: Math.round(45*scale), r: Math.round(15*scale), t: Math.round(20*scale), b: Math.round(45*scale) },
   paper_bgcolor: "rgba(255,255,255,0)", plot_bgcolor: "rgba(255,255,255,0)",
   font: chartFont(),
   xaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), tickangle: -30, automargin: true, zeroline: false },

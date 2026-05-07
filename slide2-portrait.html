@@ -54,7 +54,7 @@
     border-top: 1px solid var(--surface);
     padding: calc(18px * var(--s)) calc(48px * var(--s));
     display: flex; flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .panel-header {
@@ -135,7 +135,7 @@
 
   .chart-area { flex: 1; min-height: 0; overflow: hidden; }
 
-  .table-slide { overflow-y: auto; flex: none; }
+  .table-slide { overflow: hidden; flex: none; }
   .table-slide table {
     width: 100%; border-collapse: collapse; font-size: calc(15px * var(--s));
   }

@@ -35,7 +35,7 @@
   }
 
   .main {
-    flex: 70; min-height: 0;
+    flex: 75; min-height: 0;
     padding: calc(28px * var(--s)) calc(48px * var(--s)) calc(16px * var(--s));
     display: flex; flex-direction: column;
     overflow: hidden;
@@ -47,17 +47,17 @@
   }
 
   .panel {
-    flex: 30; min-height: 0;
+    flex: 25; min-height: 0;
     background: #f1f5f9;
     border-top: 1px solid var(--surface);
     padding: calc(18px * var(--s)) calc(48px * var(--s));
     display: flex; flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .panel-header {
     display: flex; align-items: baseline; gap: calc(24px * var(--s));
-    margin-bottom: calc(12px * var(--s));
+    margin-bottom: calc(10px * var(--s));
   }
   .panel-header .slide-num {
     font-size: calc(12px * var(--s)); color: var(--muted); text-transform: uppercase;
@@ -68,9 +68,6 @@
     color: var(--text);
   }
 
-  .panel-body {
-    flex: 1; min-height: 0;
-  }
   .panel-body .narrative {
     font-size: calc(12px * var(--s)); line-height: 1.35; color: var(--muted);
   }
@@ -86,7 +83,7 @@
 
   .panel-footer {
     font-size: calc(12px * var(--s)); color: var(--muted); margin-top: auto;
-    padding-top: calc(10px * var(--s)); border-top: 1px solid var(--surface);
+    padding-top: calc(8px * var(--s)); border-top: 1px solid var(--surface);
   }
 
   .kpi-row {
@@ -121,9 +118,12 @@
 <div class="logo-bar">BTTB.ai</div>
 <div class="slide-inner">
   <div class="main">
-    <h3>Platform engagement overview</h3>
-    <div class="kpi-row" id="kpi-row-1"></div>
-    <div class="chart-area" id="s0-chart"></div>
+    <h3>Summary metrics</h3>
+    <div class="kpi-row" id="kpi-row-final"></div>
+    <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(32px * var(--s));">
+      <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart1"></div>
+      <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
+    </div>
   </div>
   <div class="panel" id="s0-panel"></div>
 </div>
@@ -136,6 +136,11 @@ const MUTED = "#64748b";
 const fmt = n => Number(n).toLocaleString();
 const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
 const deltaPctVal = (a, b) => b > 0 ? Math.round(100 * (a - b) / b) : 0;
+
+const PROG_COLORS = {
+  SFT: "#3b82f6", L2HC: "#10b981", SGE: "#f59e0b", WTD: "#8b5cf6",
+  DPG: "#ec4899", BBD: "#06b6d4", WBC: "#ef4444", L34HC: "#6b7280",
+};
 
 function setScale() {
   const s = Math.max(1, window.innerWidth / 2160);
@@ -184,9 +189,7 @@ async function build() {
   const totalAi = daily.reduce((s, r) => s + r.ai_messages, 0);
   const nDays = daily.length;
   const avgDau = (daily.reduce((s, r) => s + r.active_users, 0) / nDays).toFixed(1);
-  const peak = daily.reduce((a, b) => b.active_users > a.active_users ? b : a, daily[0]);
   const overallCR = pct(totalCompletes, totalStarts);
-  const firstDay = daily[0].day;
   const lastDay = daily[nDays - 1].day;
   const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
@@ -204,29 +207,50 @@ async function build() {
   const pct6 = (100 * dTotals[5] / dGrand).toFixed(1);
   const pct1 = (100 * dTotals[0] / dGrand).toFixed(1);
 
+  const mainProgs = programs.filter(p => p.starts >= 10);
   const BBD_DATE = "2026-03-16";
   const progSinceBBD = progDaily.filter(r => r.day >= BBD_DATE);
   const totalSinceBBD = progSinceBBD.reduce((s,r) => s + r.starts, 0);
   const bbdSinceBBD = progSinceBBD.filter(r => r.program_short === "BBD").reduce((s,r) => s + r.starts, 0);
   const bbdPct = totalSinceBBD > 0 ? Math.round(100 * bbdSinceBBD / totalSinceBBD) : 0;
 
-  // ===== KPI cards (from Slide 1) =====
-  document.getElementById("kpi-row-1").innerHTML = [
-    { l: "Total Signups", v: fmt(totalSignups) },
-    { l: "Avg Daily Active", v: avgDau },
-    { l: "Peak DAU", v: fmt(peak.active_users), s: peak.day },
-    { l: "Video Starts", v: fmt(totalStarts) },
-    { l: "Completion Rate", v: `${overallCR}%` },
-    { l: "AI Messages", v: fmt(totalAi) },
-  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val">${k.v}</div>${k.s ? `<div class="sub">${k.s}</div>` : ""}</div>`).join("");
+  const progNames = [...new Set(progDaily.map(r => r.program_short))].filter(p =>
+    mainProgs.some(m => m.program_short === p));
+  const allDays = [...new Set(progDaily.map(r => r.day))].sort();
+  const traces = progNames.map(prog => {
+    const byDay = new Map(progDaily.filter(r => r.program_short === prog).map(r => [r.day, r.starts]));
+    return {
+      x: allDays, y: allDays.map(d => byDay.get(d) || 0),
+      type: "scatter", mode: "lines", name: prog, stackgroup: "one",
+      line: { width: Math.round(0.5*scale) }, fillcolor: (PROG_COLORS[prog] || MUTED) + "cc",
+      marker: { color: PROG_COLORS[prog] || MUTED },
+      hovertemplate: `${prog}: %{y}<extra></extra>`,
+    };
+  });
 
-  // ===== DAU chart (from Slide 1) =====
-  Plotly.newPlot("s0-chart", [{
-    x: daily.map(r => r.day), y: daily.map(r => r.active_users),
+  // ===== Summary KPI row (from Slide 8) =====
+  document.getElementById("kpi-row-final").innerHTML = [
+    { l: "Playlist Impact", v: `+${vpuDelta}%`, s: "videos per user" },
+    { l: "Completion Rate", v: `${overallCR}%`, s: "of all videos" },
+    { l: "Full Playlist Users", v: `${pct6}%`, s: "watch all 6 videos" },
+    { l: "Avg DAU", v: avgDau, s: "steady 7 days/week" },
+    { l: "BBD Adoption", v: `${bbdPct}%`, s: "of starts since launch" },
+  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val" style="font-size:calc(30px * var(--s))">${k.v}</div><div class="sub">${k.s}</div></div>`).join("");
+
+  // ===== DAU chart (from Slide 8) =====
+  Plotly.newPlot("s0-chart1", [{
+    x: daily.map(r=>r.day), y: daily.map(r=>r.active_users),
     type: "scatter", mode: "lines", fill: "tozeroy",
-    line: { color: "#3b82f6", width: Math.round(2.5*scale) }, fillcolor: "rgba(59,130,246,0.15)",
-    hovertemplate: "%{x|%b %d}<br>%{y} DAU<extra></extra>",
-  }], darkLayout({ yaxis: { title: "Daily Active Users", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() } }), cfg);
+    line: { color: "#3b82f6", width: Math.round(2*scale) }, fillcolor: "rgba(59,130,246,0.08)",
+  }], darkLayout({ margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(10*scale),b:Math.round(40*scale)},
+    yaxis:{title:"DAU",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
+
+  // ===== Stacked program chart (from Slide 8) =====
+  Plotly.newPlot("s0-chart2", traces.map(t => ({...t})), darkLayout({
+    showlegend: true, legend: { orientation: "h", y: 1.45, x: 0, font: { color: "#475569", size: Math.round(11*scale) } },
+    margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(55*scale),b:Math.round(40*scale)},
+    yaxis:{title:"Daily starts",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()},
+  }), cfg);
 
   // ===== Takeaways panel (from Slide 8) =====
   document.getElementById("s0-panel").innerHTML = `
@@ -236,11 +260,10 @@ async function build() {
     </div>
     <div class="panel-body">
       <div class="narrative">
-        <strong>What's working:</strong> Playlist model drives <span class="stat green">+${vpuDelta}%</span> videos per user. Overall completion rate of <span class="stat green">${overallCR}%</span> — devotional programs exceed 80%. <span class="stat green">${pct6}%</span> of users complete the full 6-video workout. Consistent engagement 7 days a week.
-        <strong>Opportunities:</strong> Convert the <span class="stat">${pct1}%</span> single-video users into multi-video users through nudges and onboarding. Formal launch with push notifications to improve return rates. Expand BBD (<span class="stat green">${bbdPct}%</span> of starts since launch) and other high-completion programs.
+        <strong>What's working:</strong> Playlist model drives <span class="stat green">+${vpuDelta}%</span> videos per user. Completion rate of <span class="stat green">${overallCR}%</span> overall — devotional programs exceed 80%. <span class="stat green">${pct6}%</span> of users complete the full 6-video workout. Consistent engagement 7 days a week. <strong>Opportunities:</strong> Convert the <span class="stat">${pct1}%</span> single-video users into multi-video users through nudges and onboarding. Formal launch with push notifications to improve return rates. Expand BBD (<span class="stat green">${bbdPct}%</span> of starts since launch) and other high-completion programs. All metrics are organic — zero paid promotion.
       </div>
     </div>
-    <div class="panel-footer">BTTB.ai · ${fmtDate(firstDay)} – ${fmtDate(lastDay)} · ${nDays} days · All metrics are organic, zero paid promotion</div>`;
+    <div class="panel-footer">BTTB.ai · ${fmtDate(lastDay)} · ${nDays} days of data</div>`;
 }
 
 build().catch(e => console.error(e));

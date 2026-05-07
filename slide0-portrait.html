@@ -72,23 +72,17 @@
     flex: 1; min-height: 0;
   }
   .panel-body .narrative {
-    font-size: calc(12px * var(--s)); line-height: 1.55; color: var(--muted);
+    font-size: calc(12px * var(--s)); line-height: 1.35; color: var(--muted);
   }
   .panel-body .narrative strong { color: var(--text); font-weight: 600; }
   .panel-body .narrative .stat {
     display: inline-block; background: rgba(37,99,235,0.1);
-    color: #1d4ed8; padding: calc(2px * var(--s)) calc(8px * var(--s)); border-radius: calc(4px * var(--s));
+    color: #1d4ed8; padding: calc(1px * var(--s)) calc(6px * var(--s)); border-radius: calc(4px * var(--s));
     font-weight: 600; font-variant-numeric: tabular-nums;
   }
   .panel-body .narrative .stat.green {
     background: rgba(5,150,105,0.1); color: #047857;
   }
-  .panel-body .narrative p { margin-bottom: calc(8px * var(--s)); }
-
-  .panel-body .two-col {
-    display: flex; gap: calc(32px * var(--s));
-  }
-  .panel-body .two-col > div { flex: 1; }
 
   .panel-footer {
     font-size: calc(12px * var(--s)); color: var(--muted); margin-top: auto;
@@ -242,18 +236,8 @@ async function build() {
     </div>
     <div class="panel-body">
       <div class="narrative">
-        <div class="two-col">
-          <div>
-            <p><strong>What's working:</strong></p>
-            <p>Playlist model drives <span class="stat green">+${vpuDelta}%</span> videos per user. Overall completion rate of <span class="stat green">${overallCR}%</span> — devotional programs exceed 80%.</p>
-            <p><span class="stat green">${pct6}%</span> of users complete the full 6-video workout. Consistent engagement 7 days a week.</p>
-          </div>
-          <div>
-            <p><strong>Opportunities ahead:</strong></p>
-            <p>Convert the <span class="stat">${pct1}%</span> single-video users into multi-video users through nudges and onboarding.</p>
-            <p>Formal launch with push notifications to improve return rates. Expand BBD (<span class="stat green">${bbdPct}%</span> of starts since launch) and other high-completion programs.</p>
-          </div>
-        </div>
+        <strong>What's working:</strong> Playlist model drives <span class="stat green">+${vpuDelta}%</span> videos per user. Overall completion rate of <span class="stat green">${overallCR}%</span> — devotional programs exceed 80%. <span class="stat green">${pct6}%</span> of users complete the full 6-video workout. Consistent engagement 7 days a week.
+        <strong>Opportunities:</strong> Convert the <span class="stat">${pct1}%</span> single-video users into multi-video users through nudges and onboarding. Formal launch with push notifications to improve return rates. Expand BBD (<span class="stat green">${bbdPct}%</span> of starts since launch) and other high-completion programs.
       </div>
     </div>
     <div class="panel-footer">BTTB.ai · ${fmtDate(firstDay)} – ${fmtDate(lastDay)} · ${nDays} days · All metrics are organic, zero paid promotion</div>`;

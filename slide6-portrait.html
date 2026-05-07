@@ -371,8 +371,8 @@ async function build() {
     { x: wke.map(r=>r.day), y: wke.map(r=>r.vids_per_user), type:"scatter", mode:"lines+markers",
       name:"Weekend", line:{color:"#f59e0b",width:Math.round(2*scale)}, marker:{color:"#f59e0b",size:Math.round(6*scale),symbol:"diamond"},
       hovertemplate:"%{x|%a %b %d}<br>%{y:.1f}<extra>Weekend</extra>" },
-  ], darkLayout({ showlegend:true, legend:{orientation:"h",y:1.22,x:0,font:{color:"#475569",size:Math.round(12*scale)}},
-    margin:{l:Math.round(50*scale),r:Math.round(15*scale),t:Math.round(50*scale),b:Math.round(35*scale)},
+  ], darkLayout({ showlegend:true, legend:{orientation:"h",y:1.35,x:0,font:{color:"#475569",size:Math.round(12*scale)}},
+    margin:{l:Math.round(50*scale),r:Math.round(15*scale),t:Math.round(65*scale),b:Math.round(35*scale)},
     yaxis:{title:"Videos / user",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
 
   Plotly.newPlot("s6-chart2", [
@@ -382,8 +382,8 @@ async function build() {
     { x: wke.map(r=>r.day), y: wke.map(r=>r.completion_pct), type:"scatter", mode:"lines+markers",
       name:"Weekend", line:{color:"#f59e0b",width:Math.round(2*scale)}, marker:{color:"#f59e0b",size:Math.round(6*scale),symbol:"diamond"},
       hovertemplate:"%{x|%a %b %d}<br>%{y:.1f}%<extra>Weekend</extra>" },
-  ], darkLayout({ showlegend:true, legend:{orientation:"h",y:1.22,x:0,font:{color:"#475569",size:Math.round(12*scale)}},
-    margin:{l:Math.round(50*scale),r:Math.round(15*scale),t:Math.round(50*scale),b:Math.round(35*scale)},
+  ], darkLayout({ showlegend:true, legend:{orientation:"h",y:1.35,x:0,font:{color:"#475569",size:Math.round(12*scale)}},
+    margin:{l:Math.round(50*scale),r:Math.round(15*scale),t:Math.round(65*scale),b:Math.round(35*scale)},
     yaxis:{title:"Completion %",ticksuffix:"%",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
 
 }

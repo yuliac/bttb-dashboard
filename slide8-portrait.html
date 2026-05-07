@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · Key Takeaways (Portrait)</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --brand: #2563eb;
+    --accent: #059669;
+    --warn: #dc2626;
+    --bg: #ffffff;
+    --card: #f8fafc;
+    --surface: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --s: 1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: #f8fafc; color: var(--text);
+    overflow: hidden; height: 100vh;
+  }
+
+  .slide-inner {
+    width: 100vw; height: 100vh;
+  }
+
+  .slide-inner {
+    display: flex; flex-direction: column;
+  }
+
+  .main {
+    flex: 75; min-height: 0;
+    padding: calc(28px * var(--s)) calc(48px * var(--s)) calc(16px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .main h3 {
+    font-size: calc(16px * var(--s)); font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: calc(10px * var(--s));
+  }
+
+  .panel {
+    flex: 25; min-height: 0;
+    background: #f1f5f9;
+    border-top: 1px solid var(--surface);
+    padding: calc(18px * var(--s)) calc(48px * var(--s));
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel-header {
+    display: flex; align-items: baseline; gap: calc(24px * var(--s));
+    margin-bottom: calc(14px * var(--s));
+  }
+  .panel-header .slide-num {
+    font-size: calc(12px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600; white-space: nowrap;
+  }
+  .panel-header h2 {
+    font-size: calc(20px * var(--s)); font-weight: 800; line-height: 1.2;
+    color: var(--text);
+  }
+
+  .panel-body .narrative {
+    font-size: calc(12px * var(--s)); line-height: 1.6; color: var(--muted);
+  }
+  .panel-body .narrative strong { color: var(--text); font-weight: 600; }
+  .panel-body .narrative .stat {
+    display: inline-block; background: rgba(37,99,235,0.1);
+    color: #1d4ed8; padding: calc(2px * var(--s)) calc(8px * var(--s)); border-radius: calc(4px * var(--s));
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .panel-body .narrative .stat.green {
+    background: rgba(5,150,105,0.1); color: #047857;
+  }
+  .panel-body .narrative p { margin-bottom: calc(10px * var(--s)); }
+
+  .panel-footer {
+    font-size: calc(12px * var(--s)); color: var(--muted); margin-top: auto;
+    padding-top: calc(12px * var(--s)); border-top: 1px solid var(--surface);
+  }
+
+  .two-charts {
+    display: flex; flex-direction: column; gap: calc(32px * var(--s)); flex: 1; min-height: 0;
+    overflow: hidden;
+  }
+  .two-charts > div { flex: 1; min-height: 0; overflow: hidden; }
+
+  .kpi-row {
+    display: flex; gap: calc(12px * var(--s)); margin-bottom: calc(20px * var(--s)); flex-wrap: wrap;
+  }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--surface);
+    border-radius: calc(12px * var(--s)); padding: calc(14px * var(--s)) calc(18px * var(--s));
+    flex: 1; min-width: calc(130px * var(--s));
+  }
+  .kpi-card .label {
+    font-size: calc(12px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 500;
+  }
+  .kpi-card .val {
+    font-size: calc(28px * var(--s)); font-weight: 800; margin-top: calc(4px * var(--s));
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card .sub { font-size: calc(13px * var(--s)); color: var(--muted); margin-top: calc(2px * var(--s)); }
+
+  .compare-row {
+    display: flex; gap: calc(20px * var(--s)); margin-bottom: calc(20px * var(--s));
+  }
+  .compare-box {
+    background: var(--card); border: 1px solid var(--surface);
+    border-radius: calc(12px * var(--s)); padding: calc(20px * var(--s)) calc(24px * var(--s)); flex: 1;
+  }
+  .compare-box .era-label {
+    font-size: calc(11px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 600;
+  }
+  .compare-box .era-val {
+    font-size: calc(40px * var(--s)); font-weight: 800; margin-top: calc(4px * var(--s));
+  }
+  .compare-box .delta {
+    font-size: calc(14px * var(--s)); font-weight: 700; margin-top: calc(4px * var(--s));
+  }
+  .up { color: #059669; }
+  .down { color: #dc2626; }
+
+  .chart-area { flex: 1; min-height: 0; overflow: hidden; }
+
+  .table-slide { overflow-y: auto; flex: none; }
+  .table-slide table {
+    width: 100%; border-collapse: collapse; font-size: calc(15px * var(--s));
+  }
+  .table-slide th {
+    font-size: calc(12px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 600;
+    padding: calc(12px * var(--s)) calc(14px * var(--s)); text-align: left;
+    border-bottom: 2px solid var(--surface);
+    position: sticky; top: 0; background: var(--bg);
+  }
+  .table-slide td {
+    padding: calc(12px * var(--s)) calc(14px * var(--s)); border-bottom: 1px solid var(--surface);
+    font-variant-numeric: tabular-nums;
+  }
+  .table-slide td.num { text-align: right; }
+  .table-slide th.num { text-align: right; }
+
+  .logo-bar {
+    position: fixed; top: calc(20px * var(--s)); right: calc(32px * var(--s)); z-index: 100;
+    font-size: calc(14px * var(--s)); font-weight: 700; color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="logo-bar">BTTB.ai</div>
+<div class="slide-inner">
+  <div class="main">
+      <h3>Summary metrics</h3>
+      <div class="kpi-row" id="kpi-row-final"></div>
+      <div class="chart-area" id="s8-chart" style="display:flex; flex-direction:column; gap:calc(32px * var(--s));">
+        <div style="flex:1; min-height:0; overflow:hidden;" id="s8-chart1"></div>
+        <div style="flex:1; min-height:0; overflow:hidden;" id="s8-chart2"></div>
+      </div>
+  </div>
+  <div class="panel" id="s8-panel"></div>
+</div>
+
+<script>
+
+const URL_  = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+const BRAND = "#2563eb", ACCENT = "#10b981", WARN = "#dc2626", MUTED = "#64748b";
+const fmt = n => Number(n).toLocaleString();
+const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
+const deltaPctVal = (a, b) => b > 0 ? Math.round(100 * (a - b) / b) : 0;
+
+const PROG_COLORS = {
+  SFT: "#3b82f6", L2HC: "#10b981", SGE: "#f59e0b", WTD: "#8b5cf6",
+  DPG: "#ec4899", BBD: "#06b6d4", WBC: "#ef4444", L34HC: "#6b7280",
+};
+
+async function api(view, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${view}: ${r.status}`);
+  return r.json();
+}
+
+function chartFont() {
+  const base = Math.round(13 * scale);
+  return { family: "Inter, system-ui", size: base, color: "#475569" };
+}
+function tickFont(color) {
+  return { color: color || "#64748b", size: Math.round(12 * scale) };
+}
+
+const darkLayout = (extra = {}) => ({
+  margin: { l: Math.round(55*scale), r: Math.round(30*scale), t: Math.round(30*scale), b: Math.round(55*scale) },
+  paper_bgcolor: "rgba(255,255,255,0)", plot_bgcolor: "rgba(255,255,255,0)",
+  font: chartFont(),
+  xaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), tickangle: -30, automargin: true, zeroline: false },
+  yaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), automargin: true, zeroline: false },
+  showlegend: false,
+  ...extra,
+});
+const cfg = { displayModeBar: false, responsive: true };
+
+function pivotLine(d, label) {
+  return {
+    shapes: [{ type: "line", x0: d, x1: d, y0: 0, y1: 1, yref: "paper",
+               line: { color: "#f87171", width: Math.round(2*scale), dash: "dash" } }],
+    annotations: [{ x: d, y: 1.05, yref: "paper", text: label,
+                    showarrow: false, font: { size: Math.round(12*scale), color: "#f87171" },
+                    yanchor: "bottom", xanchor: "left" }],
+  };
+}
+
+
+function setScale() {
+  const s = Math.max(1, window.innerWidth / 2160);
+  document.documentElement.style.setProperty("--s", s.toFixed(3));
+  return s;
+}
+let scale = setScale();
+window.addEventListener("resize", () => { scale = setScale(); });
+
+
+function slidePanel(id, num, title, narrativeHtml, footerHtml) {
+  document.getElementById(id).innerHTML = `
+    <div class="panel-header">
+      <div class="slide-num">Slide ${num} of 8</div>
+      <h2>${title}</h2>
+    </div>
+    <div class="panel-body">
+      <div class="narrative">${narrativeHtml}</div>
+    </div>
+    <div class="panel-footer">${footerHtml}</div>`;
+}
+
+
+async function build() {
+  const [daily, signups, depth, programs, progDaily, plDepth, daytype] = await Promise.all([
+    api("vw_daily_engagement", "order=day.asc&limit=10000"),
+    api("vw_daily_signups", "order=signup_day.asc&limit=10000"),
+    api("vw_daily_content_depth", "order=day.asc&limit=10000"),
+    api("vw_program_engagement", "order=starts.desc&limit=50"),
+    api("vw_daily_program_engagement", "order=day.asc&limit=50000"),
+    api("vw_daily_playlist_depth", "day=gte.2026-03-30&order=day.asc,depth_bucket.asc&limit=50000"),
+    api("vw_daily_daytype", "day=gte.2026-03-30&order=day.asc&limit=10000"),
+  ]);
+
+  const totalSignups = signups.reduce((s, r) => s + r.signups, 0);
+  const totalStarts = daily.reduce((s, r) => s + r.video_starts, 0);
+  const totalCompletes = daily.reduce((s, r) => s + r.video_completes, 0);
+  const totalAi = daily.reduce((s, r) => s + r.ai_messages, 0);
+  const nDays = daily.length;
+  const avgDau = (daily.reduce((s, r) => s + r.active_users, 0) / nDays).toFixed(1);
+  const peak = daily.reduce((a, b) => b.active_users > a.active_users ? b : a, daily[0]);
+  const overallCR = pct(totalCompletes, totalStarts);
+  const firstDay = daily[0].day;
+  const lastDay = daily[nDays - 1].day;
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  const PIVOT = "2026-03-30";
+  const before = depth.filter(r => r.day < PIVOT);
+  const after  = depth.filter(r => r.day >= PIVOT);
+  const avg = (arr, key) => arr.length ? arr.reduce((s, r) => s + Number(r[key] || 0), 0) / arr.length : 0;
+  const bVPU = avg(before, "videos_per_user");
+  const aVPU = avg(after, "videos_per_user");
+  const bCR = avg(before, "completion_pct");
+  const aCR = avg(after, "completion_pct");
+  const vpuDelta = deltaPctVal(aVPU, bVPU);
+  const crDelta = deltaPctVal(aCR, bCR);
+
+  const buckets = [1,2,3,4,5,6,7];
+  const bLabels = ["1 video","2 videos","3 videos","4 videos","5 videos","6 videos","7+"];
+  const bColors = ["#ef4444","#f97316","#eab308","#84cc16","#22c55e","#10b981","#059669"];
+  const dTotals = buckets.map(b => plDepth.filter(r => r.depth_bucket === b).reduce((s,r) => s + r.users, 0));
+  const dGrand = dTotals.reduce((a,b) => a + b, 0);
+  const pct6 = (100 * dTotals[5] / dGrand).toFixed(1);
+  const pct1 = (100 * dTotals[0] / dGrand).toFixed(1);
+  const dCR = buckets.map(b => {
+    const rows = plDepth.filter(r => r.depth_bucket === b);
+    const tot = rows.reduce((s,r) => s + r.users, 0);
+    const wcr = rows.reduce((s,r) => s + r.avg_completion_pct * r.users, 0);
+    return tot > 0 ? (wcr / tot) : 0;
+  });
+  const cr5plus = dGrand > 0 ? ((dCR[4] * dTotals[4] + dCR[5] * dTotals[5] + dCR[6] * dTotals[6]) / (dTotals[4] + dTotals[5] + dTotals[6])).toFixed(0) : 0;
+  const cr1 = dCR[0].toFixed(0);
+
+  const mainProgs = programs.filter(p => p.starts >= 10);
+  const sft = mainProgs.find(p => p.program_short === "SFT");
+  const l2hc = mainProgs.find(p => p.program_short === "L2HC");
+  const topCR = [...mainProgs].sort((a,b) => b.completion_pct - a.completion_pct);
+  const top3 = topCR.slice(0, 3);
+
+  const BBD_DATE = "2026-03-16";
+  const progSinceBBD = progDaily.filter(r => r.day >= BBD_DATE);
+  const totalSinceBBD = progSinceBBD.reduce((s,r) => s + r.starts, 0);
+  const bbdSinceBBD = progSinceBBD.filter(r => r.program_short === "BBD").reduce((s,r) => s + r.starts, 0);
+  const bbdPct = totalSinceBBD > 0 ? Math.round(100 * bbdSinceBBD / totalSinceBBD) : 0;
+
+  const progNames = [...new Set(progDaily.map(r => r.program_short))].filter(p =>
+    mainProgs.some(m => m.program_short === p));
+  const allDays = [...new Set(progDaily.map(r => r.day))].sort();
+  const traces = progNames.map(prog => {
+    const byDay = new Map(progDaily.filter(r => r.program_short === prog).map(r => [r.day, r.starts]));
+    return {
+      x: allDays, y: allDays.map(d => byDay.get(d) || 0),
+      type: "scatter", mode: "lines", name: prog, stackgroup: "one",
+      line: { width: Math.round(0.5*scale) }, fillcolor: (PROG_COLORS[prog] || MUTED) + "cc",
+      marker: { color: PROG_COLORS[prog] || MUTED },
+      hovertemplate: `${prog}: %{y}<extra></extra>`,
+    };
+  });
+
+  const wkd = daytype.filter(r => r.day_type === "Weekday");
+  const wke = daytype.filter(r => r.day_type === "Weekend");
+  const dtA = (arr, k) => arr.length ? arr.reduce((s,r) => s + Number(r[k]||0), 0) / arr.length : 0;
+  const wkdVPU = dtA(wkd, "vids_per_user").toFixed(2);
+  const wkeVPU = dtA(wke, "vids_per_user").toFixed(2);
+  const wkdCR = dtA(wkd, "completion_pct").toFixed(1);
+  const wkeCR = dtA(wke, "completion_pct").toFixed(1);
+  const wkdDAU = dtA(wkd, "active_users").toFixed(1);
+  const wkeDAU = dtA(wke, "active_users").toFixed(1);
+
+  // ===== Slide 8: Key Takeaways =====
+
+  slidePanel("s8-panel", 8, "Key Takeaways",
+    `<p>These results are from an <strong>un-launched, un-promoted platform</strong>. Every metric here is organic.</p>
+     <p><strong>What's working:</strong></p>
+     <p>The playlist model is a clear winner — giving users choice over their content journey dramatically increases both depth and completion.</p>
+     <p>Content quality is validated: ${overallCR}% overall completion, with devotional programs exceeding 80%.</p>
+     <p>Users engage consistently 7 days a week, suggesting BTTB fits into daily routines.</p>
+     <p><strong>Opportunities ahead:</strong></p>
+     <p>Convert the ${pct1}% single-video users into multi-video users through nudges and onboarding.</p>
+     <p>A formal launch with push notifications could significantly improve return rates.</p>
+     <p>Expand BBD and other high-completion programs to capitalize on their strong engagement.</p>`,
+    `BTTB.ai · ${fmtDate(lastDay)}`
+  );
+
+  document.getElementById("kpi-row-final").innerHTML = [
+    { l: "Playlist Impact", v: `+${vpuDelta}%`, s: "videos per user" },
+    { l: "Completion Rate", v: `${overallCR}%`, s: "of all videos" },
+    { l: "Full Playlist Users", v: `${pct6}%`, s: "watch all 6 videos" },
+    { l: "Avg DAU", v: avgDau, s: "steady 7 days/week" },
+    { l: "BBD Adoption", v: `${bbdPct}%`, s: "of starts since launch" },
+  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val" style="font-size:calc(30px * var(--s))">${k.v}</div><div class="sub">${k.s}</div></div>`).join("");
+
+  Plotly.newPlot("s8-chart1", [{
+    x: daily.map(r=>r.day), y: daily.map(r=>r.active_users),
+    type: "scatter", mode: "lines", fill: "tozeroy",
+    line: { color: "#3b82f6", width: Math.round(2*scale) }, fillcolor: "rgba(59,130,246,0.08)",
+  }], darkLayout({ margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(10*scale),b:Math.round(40*scale)},
+    yaxis:{title:"DAU",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
+
+  Plotly.newPlot("s8-chart2", traces.map(t => ({...t})), darkLayout({
+    showlegend: true, legend: { orientation: "h", y: 1.45, x: 0, font: { color: "#475569", size: Math.round(11*scale) } },
+    margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(55*scale),b:Math.round(40*scale)},
+    yaxis:{title:"Daily starts",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()},
+  }), cfg);
+
+}
+
+build().catch(e => console.error(e));
+</script>
+</body>
+</html>

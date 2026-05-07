@@ -43,7 +43,7 @@
     overflow: hidden;
   }
   .main h3 {
-    font-size: calc(16px * var(--s)); font-weight: 600; color: var(--muted);
+    font-size: calc(20px * var(--s)); font-weight: 700; color: var(--text);
     text-transform: uppercase; letter-spacing: 0.06em;
     margin-bottom: calc(10px * var(--s));
   }
@@ -90,7 +90,7 @@
   }
 
   .two-charts {
-    display: flex; flex-direction: column; gap: calc(32px * var(--s)); flex: 1; min-height: 0;
+    display: flex; flex-direction: column; gap: calc(8px * var(--s)); flex: 1; min-height: 0;
     overflow: hidden;
   }
   .two-charts > div { flex: 1; min-height: 0; overflow: hidden; }
@@ -238,7 +238,7 @@ window.addEventListener("resize", () => { scale = setScale(); });
 function slidePanel(id, num, title, narrativeHtml, footerHtml) {
   document.getElementById(id).innerHTML = `
     <div class="panel-header">
-      <div class="slide-num">Slide ${num} of 8</div>
+      
       <h2>${title}</h2>
     </div>
     <div class="panel-body">

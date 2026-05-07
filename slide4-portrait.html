@@ -43,7 +43,7 @@
     overflow: hidden;
   }
   .main h3 {
-    font-size: calc(16px * var(--s)); font-weight: 600; color: var(--muted);
+    font-size: calc(20px * var(--s)); font-weight: 700; color: var(--text);
     text-transform: uppercase; letter-spacing: 0.06em;
     margin-bottom: calc(10px * var(--s));
   }
@@ -90,7 +90,7 @@
   }
 
   .two-charts {
-    display: flex; flex-direction: column; gap: calc(32px * var(--s)); flex: 1; min-height: 0;
+    display: flex; flex-direction: column; gap: calc(8px * var(--s)); flex: 1; min-height: 0;
     overflow: hidden;
   }
   .two-charts > div { flex: 1; min-height: 0; overflow: hidden; }
@@ -235,7 +235,7 @@ window.addEventListener("resize", () => { scale = setScale(); });
 function slidePanel(id, num, title, narrativeHtml, footerHtml) {
   document.getElementById(id).innerHTML = `
     <div class="panel-header">
-      <div class="slide-num">Slide ${num} of 8</div>
+      
       <h2>${title}</h2>
     </div>
     <div class="panel-body">
@@ -341,17 +341,21 @@ async function build() {
     `All time · All programs with 10+ starts`
   );
 
-  Plotly.newPlot("s4-chart1", [
-    { x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.starts),
-      type: "bar", name: "Starts",
-      marker: { color: mainProgs.map(p => PROG_COLORS[p.program_short] || MUTED) },
-      hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>" },
-    { x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.completion_pct),
-      type: "scatter", mode: "lines+markers", name: "Completion %", yaxis: "y2",
-      line: { color: "#f87171", width: Math.round(3*scale) }, marker: { size: Math.round(8*scale) },
-      hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>" },
-  ], darkLayout({
-    showlegend: true, legend: { orientation: "h", y: 1.1, x: 0, font: { color: "#475569", size: Math.round(12*scale) } },
+  const barTraces = mainProgs.map(p => ({
+    x: [p.program_short], y: [p.starts], type: "bar",
+    name: p.program_short, legendgroup: p.program_short,
+    marker: { color: PROG_COLORS[p.program_short] || MUTED },
+    hovertemplate: "%{x}<br>%{y:,} starts<extra></extra>",
+  }));
+  const lineTrace = {
+    x: mainProgs.map(p => p.program_short), y: mainProgs.map(p => p.completion_pct),
+    type: "scatter", mode: "lines+markers", name: "Completion %", yaxis: "y2",
+    line: { color: "#f87171", width: Math.round(3*scale) }, marker: { size: Math.round(8*scale) },
+    hovertemplate: "%{x}<br>%{y:.1f}%<extra></extra>",
+  };
+  Plotly.newPlot("s4-chart1", [...barTraces, lineTrace], darkLayout({
+    showlegend: true, legend: { orientation: "h", y: 1.15, x: 0, font: { color: "#475569", size: Math.round(11*scale) }, traceorder: "normal" },
+    margin: { l: Math.round(55*scale), r: Math.round(55*scale), t: Math.round(70*scale), b: Math.round(55*scale) },
     xaxis: { tickangle: 0, automargin: true, tickfont: tickFont() },
     yaxis: { title: "Starts", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
     yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],

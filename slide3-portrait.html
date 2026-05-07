@@ -348,21 +348,21 @@ async function build() {
   Plotly.newPlot("s3-chart1", [{
     x: bLabels, y: dTotals, type: "bar", marker: { color: bColors },
     text: dTotals.map(v => `${fmt(v)} (${(100*v/dGrand).toFixed(1)}%)`),
-    textposition: "auto", textfont: { color: "#fff", size: Math.round(12*scale) },
+    textposition: "inside", textangle: 0, textfont: { color: "#fff", size: Math.round(13*scale) },
     hovertemplate: "%{x}<br>%{y:,} user-days<extra></extra>",
   }], darkLayout({ xaxis: { tickangle: 0, automargin: true, tickfont: tickFont() },
     yaxis: { title: "User-days", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
-    margin: { t: Math.round(40*scale), b: Math.round(55*scale) } }), cfg);
+    margin: { l: Math.round(45*scale), r: Math.round(10*scale), t: Math.round(10*scale), b: Math.round(40*scale) } }), cfg);
 
   Plotly.newPlot("s3-chart2", [{
     x: bLabels, y: dCR.map(v => v.toFixed(1)), type: "bar", marker: { color: bColors },
-    text: dCR.map(v => `${v.toFixed(1)}%`), textposition: "auto",
-    textfont: { color: "#fff", size: Math.round(12*scale) },
+    text: dCR.map(v => `${v.toFixed(1)}%`), textposition: "inside", textangle: 0,
+    textfont: { color: "#fff", size: Math.round(13*scale) },
     hovertemplate: "%{x}<br>%{y:.1f}% completion<extra></extra>",
   }], darkLayout({ xaxis: { tickangle: 0, automargin: true, tickfont: tickFont() },
     yaxis: { title: "Completion %", ticksuffix: "%", range: [0, 100],
              gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
-    margin: { t: Math.round(40*scale), b: Math.round(55*scale) } }), cfg);
+    margin: { l: Math.round(45*scale), r: Math.round(10*scale), t: Math.round(10*scale), b: Math.round(40*scale) } }), cfg);
 
 }
 

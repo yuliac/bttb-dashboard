@@ -114,21 +114,22 @@
   .kpi-card .sub { font-size: calc(13px * var(--s)); color: var(--muted); margin-top: calc(2px * var(--s)); }
 
   .compare-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: calc(10px * var(--s)); margin-bottom: calc(12px * var(--s));
+    display: grid; grid-template-columns: 1fr 1fr; gap: calc(8px * var(--s)); margin-bottom: calc(6px * var(--s));
   }
   .compare-box {
     background: var(--card); border: 1px solid var(--surface);
-    border-radius: calc(8px * var(--s)); padding: calc(10px * var(--s)) calc(14px * var(--s));
+    border-radius: calc(6px * var(--s)); padding: calc(6px * var(--s)) calc(10px * var(--s));
   }
   .compare-box .era-label {
     font-size: calc(9px * var(--s)); color: var(--muted); text-transform: uppercase;
     letter-spacing: 0.06em; font-weight: 600;
   }
   .compare-box .era-val {
-    font-size: calc(22px * var(--s)); font-weight: 800; margin-top: calc(2px * var(--s));
+    font-size: calc(18px * var(--s)); font-weight: 800; margin-top: calc(1px * var(--s));
+    display: inline;
   }
   .compare-box .delta {
-    font-size: calc(10px * var(--s)); font-weight: 700; margin-top: calc(2px * var(--s));
+    font-size: calc(11px * var(--s)); font-weight: 700; display: inline;
   }
   .up { color: #059669; }
   .down { color: #dc2626; }
@@ -347,13 +348,12 @@ async function build() {
 
   document.getElementById("compare-row").innerHTML = `
     <div class="compare-box">
-      <div class="era-label">Before · Videos / User</div>
+      <div class="era-label">Before · Videos/User</div>
       <div class="era-val">${bVPU.toFixed(2)}</div>
     </div>
     <div class="compare-box">
-      <div class="era-label">After · Videos / User</div>
-      <div class="era-val" style="color:#059669">${aVPU.toFixed(2)}</div>
-      <div class="delta up">+${vpuDelta}%</div>
+      <div class="era-label">After · Videos/User</div>
+      <div class="era-val" style="color:#059669">${aVPU.toFixed(2)} <span class="delta up">+${vpuDelta}%</span></div>
     </div>
     <div class="compare-box">
       <div class="era-label">Before · Completion</div>
@@ -361,8 +361,7 @@ async function build() {
     </div>
     <div class="compare-box">
       <div class="era-label">After · Completion</div>
-      <div class="era-val" style="color:#059669">${aCR.toFixed(1)}%</div>
-      <div class="delta up">+${crDelta}%</div>
+      <div class="era-val" style="color:#059669">${aCR.toFixed(1)}% <span class="delta up">+${crDelta}%</span></div>
     </div>`;
 
   Plotly.newPlot("s2-chart1", [{

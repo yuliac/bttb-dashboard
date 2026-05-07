@@ -86,23 +86,23 @@
     padding-top: calc(8px * var(--s)); border-top: 1px solid var(--surface);
   }
 
-  .kpi-row {
-    display: flex; gap: calc(8px * var(--s)); margin-bottom: calc(10px * var(--s)); flex-wrap: wrap;
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: calc(6px * var(--s)); margin-bottom: calc(8px * var(--s));
   }
   .kpi-card {
     background: var(--card); border: 1px solid var(--surface);
-    border-radius: calc(8px * var(--s)); padding: calc(8px * var(--s)) calc(12px * var(--s));
-    flex: 1; min-width: calc(100px * var(--s));
+    border-radius: calc(6px * var(--s)); padding: calc(5px * var(--s)) calc(8px * var(--s));
   }
   .kpi-card .label {
-    font-size: calc(10px * var(--s)); color: var(--muted); text-transform: uppercase;
+    font-size: calc(8px * var(--s)); color: var(--muted); text-transform: uppercase;
     letter-spacing: 0.06em; font-weight: 500;
   }
   .kpi-card .val {
-    font-size: calc(22px * var(--s)); font-weight: 800; margin-top: calc(2px * var(--s));
+    font-size: calc(16px * var(--s)); font-weight: 800; margin-top: calc(1px * var(--s));
     font-variant-numeric: tabular-nums;
   }
-  .kpi-card .sub { font-size: calc(10px * var(--s)); color: var(--muted); margin-top: calc(2px * var(--s)); }
+  .kpi-card .sub { font-size: calc(8px * var(--s)); color: var(--muted); }
 
   .chart-area { flex: 1; min-height: 0; overflow: hidden; }
 
@@ -119,9 +119,9 @@
 <div class="slide-inner">
   <div class="main">
     <h3>Summary metrics</h3>
-    <div class="kpi-row" id="kpi-row-1"></div>
-    <div class="kpi-row" id="kpi-row-final"></div>
-    <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(32px * var(--s));">
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(16px * var(--s));">
+
       <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart1"></div>
       <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
     </div>
@@ -230,22 +230,18 @@ async function build() {
     };
   });
 
-  // ===== Platform KPI row (from Slide 1) =====
-  document.getElementById("kpi-row-1").innerHTML = [
+  // ===== Combined KPI grid (3x3) =====
+  document.getElementById("kpi-grid").innerHTML = [
     { l: "Total Signups", v: fmt(totalSignups) },
+    { l: "Avg DAU", v: avgDau, s: "7 days/week" },
     { l: "Peak DAU", v: fmt(peak.active_users), s: peak.day },
     { l: "Video Starts", v: fmt(totalStarts) },
+    { l: "Completion Rate", v: `${overallCR}%` },
     { l: "AI Messages", v: fmt(totalAi) },
+    { l: "Playlist Impact", v: `+${vpuDelta}%`, s: "vids/user" },
+    { l: "Full Playlist", v: `${pct6}%`, s: "watch all 6" },
+    { l: "BBD Adoption", v: `${bbdPct}%`, s: "since launch" },
   ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val">${k.v}</div>${k.s ? `<div class="sub">${k.s}</div>` : ""}</div>`).join("");
-
-  // ===== Summary KPI row (from Slide 8) =====
-  document.getElementById("kpi-row-final").innerHTML = [
-    { l: "Playlist Impact", v: `+${vpuDelta}%`, s: "videos per user" },
-    { l: "Completion Rate", v: `${overallCR}%`, s: "of all videos" },
-    { l: "Full Playlist Users", v: `${pct6}%`, s: "watch all 6 videos" },
-    { l: "Avg DAU", v: avgDau, s: "steady 7 days/week" },
-    { l: "BBD Adoption", v: `${bbdPct}%`, s: "of starts since launch" },
-  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val" style="font-size:calc(30px * var(--s))">${k.v}</div><div class="sub">${k.s}</div></div>`).join("");
 
   // ===== DAU chart (from Slide 8) =====
   Plotly.newPlot("s0-chart1", [{

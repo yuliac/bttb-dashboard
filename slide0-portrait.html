@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · Overview & Takeaways (Portrait)</title>
+<!-- Combines Slide 1 (Platform Overview) + Slide 8 (Key Takeaways) -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --brand: #2563eb;
+    --accent: #059669;
+    --warn: #dc2626;
+    --bg: #ffffff;
+    --card: #f8fafc;
+    --surface: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --s: 1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: #f8fafc; color: var(--text);
+    overflow: hidden; height: 100vh;
+  }
+
+  .slide-inner {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .main {
+    flex: 70; min-height: 0;
+    padding: calc(28px * var(--s)) calc(48px * var(--s)) calc(16px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .main h3 {
+    font-size: calc(16px * var(--s)); font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: calc(10px * var(--s));
+  }
+
+  .panel {
+    flex: 30; min-height: 0;
+    background: #f1f5f9;
+    border-top: 1px solid var(--surface);
+    padding: calc(18px * var(--s)) calc(48px * var(--s));
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel-header {
+    display: flex; align-items: baseline; gap: calc(24px * var(--s));
+    margin-bottom: calc(12px * var(--s));
+  }
+  .panel-header .slide-num {
+    font-size: calc(12px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600; white-space: nowrap;
+  }
+  .panel-header h2 {
+    font-size: calc(20px * var(--s)); font-weight: 800; line-height: 1.2;
+    color: var(--text);
+  }
+
+  .panel-body {
+    flex: 1; min-height: 0;
+  }
+  .panel-body .narrative {
+    font-size: calc(12px * var(--s)); line-height: 1.55; color: var(--muted);
+  }
+  .panel-body .narrative strong { color: var(--text); font-weight: 600; }
+  .panel-body .narrative .stat {
+    display: inline-block; background: rgba(37,99,235,0.1);
+    color: #1d4ed8; padding: calc(2px * var(--s)) calc(8px * var(--s)); border-radius: calc(4px * var(--s));
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .panel-body .narrative .stat.green {
+    background: rgba(5,150,105,0.1); color: #047857;
+  }
+  .panel-body .narrative p { margin-bottom: calc(8px * var(--s)); }
+
+  .panel-body .two-col {
+    display: flex; gap: calc(32px * var(--s));
+  }
+  .panel-body .two-col > div { flex: 1; }
+
+  .panel-footer {
+    font-size: calc(12px * var(--s)); color: var(--muted); margin-top: auto;
+    padding-top: calc(10px * var(--s)); border-top: 1px solid var(--surface);
+  }
+
+  .kpi-row {
+    display: flex; gap: calc(8px * var(--s)); margin-bottom: calc(10px * var(--s)); flex-wrap: wrap;
+  }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--surface);
+    border-radius: calc(8px * var(--s)); padding: calc(8px * var(--s)) calc(12px * var(--s));
+    flex: 1; min-width: calc(100px * var(--s));
+  }
+  .kpi-card .label {
+    font-size: calc(10px * var(--s)); color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 500;
+  }
+  .kpi-card .val {
+    font-size: calc(22px * var(--s)); font-weight: 800; margin-top: calc(2px * var(--s));
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card .sub { font-size: calc(10px * var(--s)); color: var(--muted); margin-top: calc(2px * var(--s)); }
+
+  .chart-area { flex: 1; min-height: 0; overflow: hidden; }
+
+  .logo-bar {
+    position: fixed; top: calc(16px * var(--s)); right: calc(32px * var(--s)); z-index: 100;
+    font-size: calc(14px * var(--s)); font-weight: 700; color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-bar">BTTB.ai</div>
+<div class="slide-inner">
+  <div class="main">
+    <h3>Platform engagement overview</h3>
+    <div class="kpi-row" id="kpi-row-1"></div>
+    <div class="chart-area" id="s0-chart"></div>
+  </div>
+  <div class="panel" id="s0-panel"></div>
+</div>
+
+<script>
+const URL_  = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+const MUTED = "#64748b";
+const fmt = n => Number(n).toLocaleString();
+const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
+const deltaPctVal = (a, b) => b > 0 ? Math.round(100 * (a - b) / b) : 0;
+
+function setScale() {
+  const s = Math.max(1, window.innerWidth / 2160);
+  document.documentElement.style.setProperty("--s", s.toFixed(3));
+  return s;
+}
+let scale = setScale();
+window.addEventListener("resize", () => { scale = setScale(); });
+
+async function api(view, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${view}: ${r.status}`);
+  return r.json();
+}
+
+function chartFont() {
+  return { family: "Inter, system-ui", size: Math.round(13 * scale), color: "#475569" };
+}
+function tickFont(color) {
+  return { color: color || "#64748b", size: Math.round(12 * scale) };
+}
+const darkLayout = (extra = {}) => ({
+  margin: { l: Math.round(55*scale), r: Math.round(30*scale), t: Math.round(30*scale), b: Math.round(55*scale) },
+  paper_bgcolor: "rgba(255,255,255,0)", plot_bgcolor: "rgba(255,255,255,0)",
+  font: chartFont(),
+  xaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), tickangle: -30, automargin: true, zeroline: false },
+  yaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), automargin: true, zeroline: false },
+  showlegend: false,
+  ...extra,
+});
+const cfg = { displayModeBar: false, responsive: true };
+
+async function build() {
+  const [daily, signups, depth, programs, progDaily, plDepth] = await Promise.all([
+    api("vw_daily_engagement", "order=day.asc&limit=10000"),
+    api("vw_daily_signups", "order=signup_day.asc&limit=10000"),
+    api("vw_daily_content_depth", "order=day.asc&limit=10000"),
+    api("vw_program_engagement", "order=starts.desc&limit=50"),
+    api("vw_daily_program_engagement", "order=day.asc&limit=50000"),
+    api("vw_daily_playlist_depth", "day=gte.2026-03-30&order=day.asc,depth_bucket.asc&limit=50000"),
+  ]);
+
+  const totalSignups = signups.reduce((s, r) => s + r.signups, 0);
+  const totalStarts = daily.reduce((s, r) => s + r.video_starts, 0);
+  const totalCompletes = daily.reduce((s, r) => s + r.video_completes, 0);
+  const totalAi = daily.reduce((s, r) => s + r.ai_messages, 0);
+  const nDays = daily.length;
+  const avgDau = (daily.reduce((s, r) => s + r.active_users, 0) / nDays).toFixed(1);
+  const peak = daily.reduce((a, b) => b.active_users > a.active_users ? b : a, daily[0]);
+  const overallCR = pct(totalCompletes, totalStarts);
+  const firstDay = daily[0].day;
+  const lastDay = daily[nDays - 1].day;
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  const PIVOT = "2026-03-30";
+  const before = depth.filter(r => r.day < PIVOT);
+  const after  = depth.filter(r => r.day >= PIVOT);
+  const avg = (arr, key) => arr.length ? arr.reduce((s, r) => s + Number(r[key] || 0), 0) / arr.length : 0;
+  const aVPU = avg(after, "videos_per_user");
+  const bVPU = avg(before, "videos_per_user");
+  const vpuDelta = deltaPctVal(aVPU, bVPU);
+
+  const buckets = [1,2,3,4,5,6,7];
+  const dTotals = buckets.map(b => plDepth.filter(r => r.depth_bucket === b).reduce((s,r) => s + r.users, 0));
+  const dGrand = dTotals.reduce((a,b) => a + b, 0);
+  const pct6 = (100 * dTotals[5] / dGrand).toFixed(1);
+  const pct1 = (100 * dTotals[0] / dGrand).toFixed(1);
+
+  const BBD_DATE = "2026-03-16";
+  const progSinceBBD = progDaily.filter(r => r.day >= BBD_DATE);
+  const totalSinceBBD = progSinceBBD.reduce((s,r) => s + r.starts, 0);
+  const bbdSinceBBD = progSinceBBD.filter(r => r.program_short === "BBD").reduce((s,r) => s + r.starts, 0);
+  const bbdPct = totalSinceBBD > 0 ? Math.round(100 * bbdSinceBBD / totalSinceBBD) : 0;
+
+  // ===== KPI cards (from Slide 1) =====
+  document.getElementById("kpi-row-1").innerHTML = [
+    { l: "Total Signups", v: fmt(totalSignups) },
+    { l: "Avg Daily Active", v: avgDau },
+    { l: "Peak DAU", v: fmt(peak.active_users), s: peak.day },
+    { l: "Video Starts", v: fmt(totalStarts) },
+    { l: "Completion Rate", v: `${overallCR}%` },
+    { l: "AI Messages", v: fmt(totalAi) },
+  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val">${k.v}</div>${k.s ? `<div class="sub">${k.s}</div>` : ""}</div>`).join("");
+
+  // ===== DAU chart (from Slide 1) =====
+  Plotly.newPlot("s0-chart", [{
+    x: daily.map(r => r.day), y: daily.map(r => r.active_users),
+    type: "scatter", mode: "lines", fill: "tozeroy",
+    line: { color: "#3b82f6", width: Math.round(2.5*scale) }, fillcolor: "rgba(59,130,246,0.15)",
+    hovertemplate: "%{x|%b %d}<br>%{y} DAU<extra></extra>",
+  }], darkLayout({ yaxis: { title: "Daily Active Users", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() } }), cfg);
+
+  // ===== Takeaways panel (from Slide 8) =====
+  document.getElementById("s0-panel").innerHTML = `
+    <div class="panel-header">
+      <div class="slide-num">Overview</div>
+      <h2>Key Takeaways</h2>
+    </div>
+    <div class="panel-body">
+      <div class="narrative">
+        <div class="two-col">
+          <div>
+            <p><strong>What's working:</strong></p>
+            <p>Playlist model drives <span class="stat green">+${vpuDelta}%</span> videos per user. Overall completion rate of <span class="stat green">${overallCR}%</span> — devotional programs exceed 80%.</p>
+            <p><span class="stat green">${pct6}%</span> of users complete the full 6-video workout. Consistent engagement 7 days a week.</p>
+          </div>
+          <div>
+            <p><strong>Opportunities ahead:</strong></p>
+            <p>Convert the <span class="stat">${pct1}%</span> single-video users into multi-video users through nudges and onboarding.</p>
+            <p>Formal launch with push notifications to improve return rates. Expand BBD (<span class="stat green">${bbdPct}%</span> of starts since launch) and other high-completion programs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">BTTB.ai · ${fmtDate(firstDay)} – ${fmtDate(lastDay)} · ${nDays} days · All metrics are organic, zero paid promotion</div>`;
+}
+
+build().catch(e => console.error(e));
+</script>
+</body>
+</html>

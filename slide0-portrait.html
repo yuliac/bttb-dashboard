@@ -119,6 +119,7 @@
 <div class="slide-inner">
   <div class="main">
     <h3>Summary metrics</h3>
+    <div class="kpi-row" id="kpi-row-1"></div>
     <div class="kpi-row" id="kpi-row-final"></div>
     <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(32px * var(--s));">
       <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart1"></div>
@@ -189,6 +190,7 @@ async function build() {
   const totalAi = daily.reduce((s, r) => s + r.ai_messages, 0);
   const nDays = daily.length;
   const avgDau = (daily.reduce((s, r) => s + r.active_users, 0) / nDays).toFixed(1);
+  const peak = daily.reduce((a, b) => b.active_users > a.active_users ? b : a, daily[0]);
   const overallCR = pct(totalCompletes, totalStarts);
   const lastDay = daily[nDays - 1].day;
   const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -227,6 +229,14 @@ async function build() {
       hovertemplate: `${prog}: %{y}<extra></extra>`,
     };
   });
+
+  // ===== Platform KPI row (from Slide 1) =====
+  document.getElementById("kpi-row-1").innerHTML = [
+    { l: "Total Signups", v: fmt(totalSignups) },
+    { l: "Peak DAU", v: fmt(peak.active_users), s: peak.day },
+    { l: "Video Starts", v: fmt(totalStarts) },
+    { l: "AI Messages", v: fmt(totalAi) },
+  ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val">${k.v}</div>${k.s ? `<div class="sub">${k.s}</div>` : ""}</div>`).join("");
 
   // ===== Summary KPI row (from Slide 8) =====
   document.getElementById("kpi-row-final").innerHTML = [

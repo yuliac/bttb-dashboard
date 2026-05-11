@@ -66,12 +66,12 @@
     letter-spacing: 0.1em; font-weight: 600; white-space: nowrap;
   }
   .panel-header h2 {
-    font-size: calc(20px * var(--s)); font-weight: 800; line-height: 1.2;
+    font-size: calc(40px * var(--s)); font-weight: 800; line-height: 1.2;
     color: var(--text);
   }
 
   .panel-body .narrative {
-    font-size: calc(12px * var(--s)); line-height: 1.6; color: var(--muted);
+    font-size: calc(24px * var(--s)); line-height: 1.6; color: var(--muted);
   }
   .panel-body .narrative strong { color: var(--text); font-weight: 600; }
   .panel-body .narrative .stat {
@@ -85,7 +85,7 @@
   .panel-body .narrative p { margin-bottom: calc(10px * var(--s)); }
 
   .panel-footer {
-    font-size: calc(12px * var(--s)); color: var(--muted); margin-top: auto;
+    font-size: calc(24px * var(--s)); color: var(--muted); margin-top: auto;
     padding-top: calc(12px * var(--s)); border-top: 1px solid var(--surface);
   }
 
@@ -370,6 +370,7 @@ async function build() {
     line: { color: "#3b82f6", width: Math.round(2.5*scale) }, marker: { size: Math.round(4*scale) },
     hovertemplate: "%{x|%b %d}<br>%{y:.1f} vids/user<extra></extra>",
   }], darkLayout({ ...pivotLine(PIVOT, "Mar 30"),
+    margin: { l: Math.round(45*scale), r: Math.round(15*scale), t: Math.round(35*scale), b: Math.round(40*scale) },
     yaxis: { title: "Videos / User", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() } }), cfg);
 
   Plotly.newPlot("s2-chart2", [{
@@ -378,6 +379,7 @@ async function build() {
     line: { color: "#34d399", width: Math.round(2.5*scale) }, marker: { size: Math.round(4*scale) },
     hovertemplate: "%{x|%b %d}<br>%{y:.1f}%<extra></extra>",
   }], darkLayout({ ...pivotLine(PIVOT, "Mar 30"),
+    margin: { l: Math.round(45*scale), r: Math.round(15*scale), t: Math.round(35*scale), b: Math.round(40*scale) },
     yaxis: { title: "Completion %", ticksuffix: "%", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() } }), cfg);
 
 }

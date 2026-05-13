@@ -120,7 +120,7 @@
     <h3>Summary metrics</h3>
     <div class="kpi-grid" id="kpi-grid"></div>
     <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(6px * var(--s));">
-      <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart1"></div>
+      <div style="flex:none;" id="s0-chart1"></div>
       <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
     </div>
   </div>
@@ -249,17 +249,18 @@ async function build() {
 
   const funnelDiv = document.getElementById("s0-chart1");
   funnelDiv.style.display = "flex";
-  funnelDiv.style.flexDirection = "column";
   funnelDiv.style.justifyContent = "center";
   funnelDiv.style.alignItems = "center";
-  funnelDiv.style.gap = `calc(6px * ${scale})`;
-  funnelDiv.innerHTML = [
+  const funnelInner = document.createElement("div");
+  funnelInner.style.cssText = `width:50%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
+  funnelDiv.appendChild(funnelInner);
+  funnelInner.innerHTML = [
     { label: "Total Users", value: fmt(totalSignups), pct: "100%", width: "100%", color: "#3b82f6" },
     { label: "Avg Daily Active", value: avgDau, pct: dauPct + "%", width: "62%", color: "#10b981" },
     { label: "Avg Daily AI Users", value: avgAiUsers, pct: aiPct + "%", width: "34%", color: "#8b5cf6" },
-  ].map(t => `<div style="width:${t.width}; background:${t.color}; border-radius:calc(8px * ${scale}); padding:calc(12px * ${scale}) calc(16px * ${scale}); display:flex; justify-content:space-between; align-items:center; color:#fff; font-family:Inter,system-ui;">
-    <span style="font-size:calc(16px * ${scale}); font-weight:600;">${t.label}</span>
-    <span style="font-size:calc(22px * ${scale}); font-weight:800;">${t.value} <span style="font-size:calc(14px * ${scale}); opacity:0.85;">${t.pct}</span></span>
+  ].map(t => `<div style="width:${t.width}; background:${t.color}; border-radius:calc(6px * ${scale}); padding:calc(10px * ${scale}) calc(14px * ${scale}); display:flex; justify-content:space-between; align-items:center; color:#fff; font-family:Inter,system-ui;">
+    <span style="font-size:calc(14px * ${scale}); font-weight:600;">${t.label}</span>
+    <span style="font-size:calc(20px * ${scale}); font-weight:800;">${t.value} <span style="font-size:calc(12px * ${scale}); opacity:0.85;">${t.pct}</span></span>
   </div>`).join("");
 
   // ===== DAU chart =====

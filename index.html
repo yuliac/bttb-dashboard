@@ -221,6 +221,7 @@
 <div class="grid">
   <div class="card"><h3>New signups per day</h3><div id="chart-signups" class="chart"></div></div>
   <div class="card"><h3>Spiritual level distribution (P1–P4)</h3><div id="chart-levels" class="chart"></div></div>
+  <div class="card"><h3>Engagement funnel</h3><div id="chart-funnel-users" class="chart" style="height:200px;"></div></div>
 </div>
 
 <h2>Content</h2>
@@ -725,6 +726,23 @@ async function load() {
       hole: 0.55, marker: { colors: [BRAND, ACCENT, "#f59e0b", "#ef4444", MUTED] },
       textinfo: "label+percent",
     }], layout({ margin: { l: 20, r: 20, t: 10, b: 10 } }), config);
+
+    // Engagement funnel
+    const avgAiUsersVal = (aiUsers.reduce((s, v) => s + v, 0) / daily.length).toFixed(1);
+    const funnelDiv = document.getElementById("chart-funnel-users");
+    funnelDiv.style.display = "flex";
+    funnelDiv.style.flexDirection = "column";
+    funnelDiv.style.justifyContent = "center";
+    funnelDiv.style.alignItems = "center";
+    funnelDiv.style.gap = "6px";
+    funnelDiv.innerHTML = [
+      { label: "Total Users", value: fmt(totalSignups), pct: "100%", width: "100%", color: BRAND },
+      { label: "Avg Daily Active", value: avgDau, pct: (100 * avgDau / totalSignups).toFixed(1) + "%", width: "62%", color: ACCENT },
+      { label: "Avg Daily AI Users", value: avgAiUsersVal, pct: (100 * avgAiUsersVal / totalSignups).toFixed(1) + "%", width: "34%", color: "#8b5cf6" },
+    ].map(t => `<div style="width:${t.width}; background:${t.color}; border-radius:8px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; color:#fff; font-family:Inter,system-ui;">
+      <span style="font-size:14px; font-weight:600;">${t.label}</span>
+      <span style="font-size:20px; font-weight:800;">${t.value} <span style="font-size:12px; opacity:0.85;">${t.pct}</span></span>
+    </div>`).join("");
 
     // Top videos table
     const top = videos.slice(0, 15);

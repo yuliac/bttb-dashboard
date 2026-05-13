@@ -241,20 +241,34 @@ async function build() {
     { l: "BBD Adoption", v: `${bbdPct}%`, s: "since launch" },
   ].map(k => `<div class="kpi-card"><div class="label">${k.l}</div><div class="val">${k.v}</div>${k.s ? `<div class="sub">${k.s}</div>` : ""}</div>`).join("");
 
-  // ===== DAU chart (from Slide 8) =====
-  Plotly.newPlot("s0-chart1", [{
+  // ===== Engagement funnel (visual widths, not proportional) =====
+  const aiUsers = daily.map(r => r.users_with_ai_msgs || 0);
+  const avgAiUsers = (aiUsers.reduce((s, v) => s + v, 0) / nDays).toFixed(1);
+  const dauPct = (100 * avgDau / totalSignups).toFixed(1);
+  const aiPct = (100 * avgAiUsers / totalSignups).toFixed(1);
+
+  const funnelDiv = document.getElementById("s0-chart1");
+  funnelDiv.style.display = "flex";
+  funnelDiv.style.flexDirection = "column";
+  funnelDiv.style.justifyContent = "center";
+  funnelDiv.style.alignItems = "center";
+  funnelDiv.style.gap = `calc(6px * ${scale})`;
+  funnelDiv.innerHTML = [
+    { label: "Total Users", value: fmt(totalSignups), pct: "100%", width: "100%", color: "#3b82f6" },
+    { label: "Avg Daily Active", value: avgDau, pct: dauPct + "%", width: "62%", color: "#10b981" },
+    { label: "Avg Daily AI Users", value: avgAiUsers, pct: aiPct + "%", width: "34%", color: "#8b5cf6" },
+  ].map(t => `<div style="width:${t.width}; background:${t.color}; border-radius:calc(8px * ${scale}); padding:calc(12px * ${scale}) calc(16px * ${scale}); display:flex; justify-content:space-between; align-items:center; color:#fff; font-family:Inter,system-ui;">
+    <span style="font-size:calc(16px * ${scale}); font-weight:600;">${t.label}</span>
+    <span style="font-size:calc(22px * ${scale}); font-weight:800;">${t.value} <span style="font-size:calc(14px * ${scale}); opacity:0.85;">${t.pct}</span></span>
+  </div>`).join("");
+
+  // ===== DAU chart =====
+  Plotly.newPlot("s0-chart2", [{
     x: daily.map(r=>r.day), y: daily.map(r=>r.active_users),
     type: "scatter", mode: "lines", fill: "tozeroy",
     line: { color: "#3b82f6", width: Math.round(2*scale) }, fillcolor: "rgba(59,130,246,0.08)",
   }], darkLayout({ margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(10*scale),b:Math.round(40*scale)},
     yaxis:{title:"DAU",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
-
-  // ===== Stacked program chart (from Slide 8) =====
-  Plotly.newPlot("s0-chart2", traces.map(t => ({...t})), darkLayout({
-    showlegend: true, legend: { orientation: "h", y: 1.45, x: 0, font: { color: "#475569", size: Math.round(11*scale) } },
-    margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(55*scale),b:Math.round(40*scale)},
-    yaxis:{title:"Daily starts",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()},
-  }), cfg);
 
   // ===== Takeaways panel (from Slide 8) =====
   document.getElementById("s0-panel").innerHTML = `

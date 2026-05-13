@@ -167,10 +167,7 @@
   <div class="main">
     <div class="logo-bar">BTTB.ai</div>
       <h3>Starts &amp; completion rate by program</h3>
-      <div class="two-charts">
-        <div id="s4-chart1"></div>
-        <div id="s4-chart2"></div>
-      </div>
+      <div class="chart-area" id="s4-chart1"></div>
   </div>
   <div class="panel" id="s4-panel"></div>
 </div>
@@ -364,27 +361,6 @@ async function build() {
     yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", range: [0, 100],
               tickfont: tickFont("#f87171"), title: "Completion %",
               titlefont: { color: "#f87171" }, automargin: true, gridcolor: "transparent" },
-  }), cfg);
-
-  // Program share donut (since Mar 16)
-  const progShare = {};
-  progSinceBBD.forEach(r => { progShare[r.program_short] = (progShare[r.program_short] || 0) + r.starts; });
-  const shareEntries = Object.entries(progShare).sort((a, b) => b[1] - a[1]);
-  Plotly.newPlot("s4-chart2", [{
-    type: "pie",
-    labels: shareEntries.map(e => e[0]),
-    values: shareEntries.map(e => e[1]),
-    hole: 0.55,
-    marker: { colors: shareEntries.map(e => PROG_COLORS[e[0]] || MUTED) },
-    textinfo: "label+percent",
-    textposition: "inside",
-    textfont: { size: Math.round(13 * scale), color: "#fff" },
-    insidetextorientation: "horizontal",
-    hovertemplate: "%{label}<br>%{value:,} starts (%{percent})<extra></extra>",
-  }], darkLayout({
-    margin: { l: Math.round(20*scale), r: Math.round(20*scale), t: Math.round(15*scale), b: Math.round(15*scale) },
-    annotations: [{ text: `<b>${fmt(totalSinceBBD)}</b><br>starts`, showarrow: false,
-      font: { size: Math.round(18*scale), color: "#1e293b", family: "Inter, system-ui" }, x: 0.5, y: 0.5 }],
   }), cfg);
 
 }

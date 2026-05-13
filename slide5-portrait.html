@@ -166,8 +166,11 @@
 <div class="slide-inner">
   <div class="main">
     <div class="logo-bar">BTTB.ai</div>
-      <h3>Daily starts by program — content mix over time</h3>
-      <div class="chart-area" id="s5-chart"></div>
+      <h3>Content starts — program share & daily trend</h3>
+      <div class="two-charts">
+        <div id="s5-chart1"></div>
+        <div id="s5-chart2"></div>
+      </div>
   </div>
   <div class="panel" id="s5-panel"></div>
 </div>
@@ -341,9 +344,30 @@ async function build() {
     `Daily stacked view · All programs`
   );
 
-  Plotly.newPlot("s5-chart", traces, darkLayout({
-    showlegend: true, legend: { orientation: "h", y: 1.06, x: 0, font: { color: "#475569", size: Math.round(12*scale) } },
-    ...pivotLine(PIVOT, "Mar 30 playlist"),
+  // Program share donut (since Mar 16)
+  const progShare = {};
+  progSinceBBD.forEach(r => { progShare[r.program_short] = (progShare[r.program_short] || 0) + r.starts; });
+  const shareEntries = Object.entries(progShare).sort((a, b) => b[1] - a[1]);
+  Plotly.newPlot("s5-chart1", [{
+    type: "pie",
+    labels: shareEntries.map(e => e[0]),
+    values: shareEntries.map(e => e[1]),
+    hole: 0.55,
+    marker: { colors: shareEntries.map(e => PROG_COLORS[e[0]] || MUTED) },
+    textinfo: "label+percent",
+    textposition: "inside",
+    textfont: { size: Math.round(13 * scale), color: "#fff" },
+    insidetextorientation: "horizontal",
+    hovertemplate: "%{label}<br>%{value:,} starts (%{percent})<extra></extra>",
+  }], darkLayout({
+    margin: { l: Math.round(20*scale), r: Math.round(20*scale), t: Math.round(15*scale), b: Math.round(15*scale) },
+    annotations: [{ text: `<b>${fmt(totalSinceBBD)}</b><br>starts`, showarrow: false,
+      font: { size: Math.round(18*scale), color: "#1e293b", family: "Inter, system-ui" }, x: 0.5, y: 0.5 }],
+  }), cfg);
+
+  // Daily starts stacked area
+  Plotly.newPlot("s5-chart2", traces, darkLayout({
+    showlegend: false,
     yaxis: { title: "Daily starts", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
   }), cfg);
 

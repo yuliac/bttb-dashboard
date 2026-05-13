@@ -120,8 +120,8 @@
     <h3>Summary metrics</h3>
     <div class="kpi-grid" id="kpi-grid"></div>
     <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(6px * var(--s));">
-      <div style="flex:none;" id="s0-chart1"></div>
-      <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
+      <div style="flex:none; padding:calc(14px * var(--s)) 0;" id="s0-chart1"></div>
+      <div style="flex:0.7; min-height:0; overflow:hidden;" id="s0-chart2"></div>
     </div>
   </div>
   <div class="panel" id="s0-panel"></div>
@@ -252,7 +252,7 @@ async function build() {
   funnelDiv.style.justifyContent = "center";
   funnelDiv.style.alignItems = "center";
   const funnelInner = document.createElement("div");
-  funnelInner.style.cssText = `width:50%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
+  funnelInner.style.cssText = `width:65%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
   funnelDiv.appendChild(funnelInner);
   funnelInner.innerHTML = [
     { label: "Total Users", value: fmt(totalSignups), pct: "100%", width: "100%", color: "#3b82f6" },

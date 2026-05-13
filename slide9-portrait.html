@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · Users (Portrait)</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --brand: #2563eb;
+    --accent: #059669;
+    --warn: #dc2626;
+    --bg: #ffffff;
+    --card: #f8fafc;
+    --surface: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --s: 1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: #f8fafc; color: var(--text);
+    overflow: hidden; height: 100vh;
+  }
+
+  .slide-inner {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .main {
+    flex: 75; min-height: 0;
+    padding: calc(20px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .main h3 {
+    font-size: calc(48px * var(--s)); font-weight: 700; color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: calc(10px * var(--s));
+  }
+
+  .panel {
+    flex: 25; min-height: 0;
+    background: #f1f5f9;
+    border-top: 1px solid var(--surface);
+    padding: calc(14px * var(--s)) calc(20px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex; align-items: baseline; gap: calc(24px * var(--s));
+    margin-bottom: calc(14px * var(--s));
+  }
+  .panel-header h2 {
+    font-size: calc(40px * var(--s)); font-weight: 800; line-height: 1.2;
+    color: var(--text);
+  }
+
+  .panel-body .narrative {
+    font-size: calc(24px * var(--s)); line-height: 1.35; color: var(--muted);
+  }
+  .panel-body .narrative strong { color: var(--text); font-weight: 600; }
+  .panel-body .narrative .stat {
+    display: inline-block; background: rgba(37,99,235,0.1);
+    color: #1d4ed8; padding: calc(2px * var(--s)) calc(8px * var(--s)); border-radius: calc(4px * var(--s));
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .panel-body .narrative .stat.green {
+    background: rgba(5,150,105,0.1); color: #047857;
+  }
+  .panel-body .narrative p { margin-bottom: calc(10px * var(--s)); }
+
+  .panel-footer {
+    font-size: calc(24px * var(--s)); color: var(--muted); margin-top: auto;
+    padding-top: calc(12px * var(--s)); border-top: 1px solid var(--surface);
+  }
+
+  .two-charts {
+    display: flex; flex-direction: column; gap: calc(8px * var(--s)); flex: 1; min-height: 0;
+    overflow: hidden;
+  }
+  .two-charts > div { flex: 1; min-height: 0; overflow: hidden; }
+
+  .logo-bar {
+    font-size: calc(24px * var(--s)); font-weight: 700; color: var(--muted);
+    letter-spacing: 0.04em; margin-bottom: calc(2px * var(--s));
+  }
+</style>
+</head>
+<body>
+
+<div class="slide-inner">
+  <div class="main">
+    <div class="logo-bar">BTTB.ai</div>
+    <h3>Users — signups & spiritual levels</h3>
+    <div class="two-charts">
+      <div id="s9-chart1"></div>
+      <div id="s9-chart2"></div>
+    </div>
+  </div>
+  <div class="panel" id="s9-panel"></div>
+</div>
+
+<script>
+const URL_  = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+const BRAND = "#2563eb", ACCENT = "#059669", MUTED = "#64748b";
+const fmt = n => Number(n).toLocaleString();
+
+function setScale() {
+  const s = Math.max(1, window.innerWidth / 2160);
+  document.documentElement.style.setProperty("--s", s.toFixed(3));
+  return s;
+}
+let scale = setScale();
+window.addEventListener("resize", () => { scale = setScale(); });
+
+async function api(view, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${view}: ${r.status}`);
+  return r.json();
+}
+
+function chartFont() {
+  return { family: "Inter, system-ui", size: Math.round(13 * scale), color: "#475569" };
+}
+function tickFont(color) {
+  return { color: color || "#64748b", size: Math.round(12 * scale) };
+}
+const darkLayout = (extra = {}) => ({
+  margin: { l: Math.round(45*scale), r: Math.round(15*scale), t: Math.round(20*scale), b: Math.round(45*scale) },
+  paper_bgcolor: "rgba(255,255,255,0)", plot_bgcolor: "rgba(255,255,255,0)",
+  font: chartFont(),
+  xaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), tickangle: -30, automargin: true, zeroline: false },
+  yaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), automargin: true, zeroline: false },
+  showlegend: false,
+  ...extra,
+});
+const cfg = { displayModeBar: false, responsive: true };
+
+const LEVEL_COLORS = { P1: BRAND, P2: ACCENT, P3: "#f59e0b", P4: "#ef4444", Unknown: MUTED };
+
+async function build() {
+  const [levels, signups] = await Promise.all([
+    api("vw_user_levels", "order=p_level.asc&limit=20"),
+    api("vw_daily_signups", "order=signup_day.asc&limit=10000"),
+  ]);
+
+  const totalUsers = levels.reduce((s, r) => s + r.users, 0);
+  const totalSignups = signups.reduce((s, r) => s + r.signups, 0);
+  const known = levels.filter(r => r.p_level !== "Unknown");
+  const topLevel = known.reduce((a, b) => b.users > a.users ? b : a, known[0]);
+  const topPct = (100 * topLevel.users / totalUsers).toFixed(1);
+  const unknownRow = levels.find(r => r.p_level === "Unknown");
+  const unknownPct = unknownRow ? (100 * unknownRow.users / totalUsers).toFixed(1) : "0";
+  const nDays = signups.length;
+  const avgSignups = (totalSignups / nDays).toFixed(1);
+  const peakDay = signups.reduce((a, b) => b.signups > a.signups ? b : a, signups[0]);
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const lastDay = signups[nDays - 1].signup_day;
+
+  // Spiritual level donut
+  Plotly.newPlot("s9-chart1", [{
+    type: "pie",
+    labels: levels.map(r => r.p_level),
+    values: levels.map(r => r.users),
+    hole: 0.55,
+    marker: { colors: levels.map(r => LEVEL_COLORS[r.p_level] || MUTED) },
+    textinfo: "label+percent",
+    textfont: { size: Math.round(14 * scale), color: "#fff" },
+    hovertemplate: "%{label}<br>%{value} users (%{percent})<extra></extra>",
+  }], darkLayout({
+    margin: { l: Math.round(20*scale), r: Math.round(20*scale), t: Math.round(15*scale), b: Math.round(15*scale) },
+    annotations: [{ text: `<b>${fmt(totalUsers)}</b><br>users`, showarrow: false,
+      font: { size: Math.round(20*scale), color: "#1e293b", family: "Inter, system-ui" }, x: 0.5, y: 0.5 }],
+  }), cfg);
+
+  // Daily signups bar chart
+  Plotly.newPlot("s9-chart2", [{
+    x: signups.map(r => r.signup_day),
+    y: signups.map(r => r.signups),
+    type: "bar",
+    marker: { color: ACCENT },
+    hovertemplate: "%{x|%b %d}<br>%{y} signups<extra></extra>",
+  }], darkLayout({
+    yaxis: { title: "Signups", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
+  }), cfg);
+
+  // Panel
+  document.getElementById("s9-panel").innerHTML = `
+    <div class="panel-header">
+      <h2>Users & Growth</h2>
+    </div>
+    <div class="panel-body">
+      <div class="narrative">
+        <p><span class="stat green">${fmt(totalUsers)}</span> total users across all spiritual levels. The largest group is <strong>${topLevel.p_level}</strong> at <span class="stat">${topPct}%</span>, while <span class="stat">${unknownPct}%</span> have not yet been assigned a level.</p>
+        <p>The platform averages <span class="stat green">${avgSignups}</span> new signups per day, with a peak of <strong>${peakDay.signups}</strong> on ${fmtDate(peakDay.signup_day)}. All growth is organic — zero paid promotion.</p>
+      </div>
+    </div>
+    <div class="panel-footer">BTTB.ai · ${fmtDate(lastDay)} · ${nDays} days of data</div>`;
+}
+
+build().catch(e => console.error(e));
+</script>
+</body>
+</html>

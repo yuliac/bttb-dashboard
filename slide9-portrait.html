@@ -101,8 +101,8 @@
     <div class="logo-bar">BTTB.ai</div>
     <h3>Users — signups & spiritual levels</h3>
     <div class="two-charts">
-      <div id="s9-chart1"></div>
-      <div id="s9-chart2"></div>
+      <div id="s9-chart1" style="flex:2;"></div>
+      <div id="s9-chart2" style="flex:1;"></div>
     </div>
   </div>
   <div class="panel" id="s9-panel"></div>
@@ -151,7 +151,7 @@ const LEVEL_COLORS = { P1: BRAND, P2: ACCENT, P3: "#f59e0b", P4: "#ef4444", Unkn
 async function build() {
   const [levels, signups] = await Promise.all([
     api("vw_user_levels", "order=p_level.asc&limit=20"),
-    api("vw_daily_signups", "order=signup_day.asc&limit=10000"),
+    api("vw_daily_signups", "signup_day=gte.2026-01-28&order=signup_day.asc&limit=10000"),
   ]);
 
   const totalUsers = levels.reduce((s, r) => s + r.users, 0);

@@ -35,7 +35,7 @@
   }
 
   .main {
-    flex: 60; min-height: 0;
+    flex: 75; min-height: 0;
     padding: calc(20px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s));
     display: flex; flex-direction: column;
     overflow: hidden;
@@ -47,7 +47,7 @@
   }
 
   .panel {
-    flex: 40; min-height: 0;
+    flex: 25; min-height: 0;
     background: #f1f5f9;
     border-top: 1px solid var(--surface);
     padding: calc(14px * var(--s)) calc(20px * var(--s));
@@ -88,7 +88,8 @@
 
   .kpi-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: calc(6px * var(--s)); margin-bottom: calc(8px * var(--s));
+    gap: calc(6px * var(--s));
+    flex: 1; min-height: 0; align-content: center;
   }
   .kpi-card {
     background: var(--card); border: 1px solid var(--surface);
@@ -119,9 +120,9 @@
     <div class="logo-bar">BTTB.ai</div>
     <h3>Summary metrics</h3>
     <div class="kpi-grid" id="kpi-grid"></div>
-    <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(6px * var(--s));">
-      <div style="flex:none; padding:calc(14px * var(--s)) 0;" id="s0-chart1"></div>
-      <div style="flex:0.7; min-height:0; overflow:hidden;" id="s0-chart2"></div>
+    <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(8px * var(--s)); flex:2; margin-top:calc(8px * var(--s));">
+      <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center;" id="s0-chart1"></div>
+      <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
     </div>
   </div>
   <div class="panel" id="s0-panel"></div>
@@ -248,9 +249,6 @@ async function build() {
   const aiPct = (100 * avgAiUsers / totalSignups).toFixed(1);
 
   const funnelDiv = document.getElementById("s0-chart1");
-  funnelDiv.style.display = "flex";
-  funnelDiv.style.justifyContent = "center";
-  funnelDiv.style.alignItems = "center";
   const funnelInner = document.createElement("div");
   funnelInner.style.cssText = `width:65%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
   funnelDiv.appendChild(funnelInner);

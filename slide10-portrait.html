@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · AI Engagement (Portrait)</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --brand: #2563eb;
+    --accent: #059669;
+    --warn: #dc2626;
+    --bg: #ffffff;
+    --card: #f8fafc;
+    --surface: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --s: 1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: #f8fafc; color: var(--text);
+    overflow: hidden; height: 100vh;
+  }
+
+  .slide-inner {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .main {
+    flex: 75; min-height: 0;
+    padding: calc(20px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .main h3 {
+    font-size: calc(48px * var(--s)); font-weight: 700; color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: calc(10px * var(--s));
+  }
+
+  .panel {
+    flex: 25; min-height: 0;
+    background: #f1f5f9;
+    border-top: 1px solid var(--surface);
+    padding: calc(14px * var(--s)) calc(20px * var(--s));
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex; align-items: baseline; gap: calc(24px * var(--s));
+    margin-bottom: calc(14px * var(--s));
+  }
+  .panel-header h2 {
+    font-size: calc(40px * var(--s)); font-weight: 800; line-height: 1.2;
+    color: var(--text);
+  }
+
+  .panel-body .narrative {
+    font-size: calc(24px * var(--s)); line-height: 1.35; color: var(--muted);
+  }
+  .panel-body .narrative strong { color: var(--text); font-weight: 600; }
+  .panel-body .narrative .stat {
+    display: inline-block; background: rgba(37,99,235,0.1);
+    color: #1d4ed8; padding: calc(2px * var(--s)) calc(8px * var(--s)); border-radius: calc(4px * var(--s));
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .panel-body .narrative .stat.green {
+    background: rgba(5,150,105,0.1); color: #047857;
+  }
+  .panel-body .narrative p { margin-bottom: calc(10px * var(--s)); }
+
+  .panel-footer {
+    font-size: calc(24px * var(--s)); color: var(--muted); margin-top: auto;
+    padding-top: calc(12px * var(--s)); border-top: 1px solid var(--surface);
+  }
+
+  .two-charts {
+    display: flex; flex-direction: column; gap: calc(8px * var(--s)); flex: 1; min-height: 0;
+    overflow: hidden;
+  }
+  .two-charts > div { flex: 1; min-height: 0; overflow: hidden; }
+
+  .logo-bar {
+    font-size: calc(24px * var(--s)); font-weight: 700; color: var(--muted);
+    letter-spacing: 0.04em; margin-bottom: calc(2px * var(--s));
+  }
+</style>
+</head>
+<body>
+
+<div class="slide-inner">
+  <div class="main">
+    <div class="logo-bar">BTTB.ai</div>
+    <h3>AI engagement</h3>
+    <div class="two-charts">
+      <div id="s10-chart1"></div>
+      <div id="s10-chart2"></div>
+    </div>
+  </div>
+  <div class="panel" id="s10-panel"></div>
+</div>
+
+<script>
+const URL_  = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+const fmt = n => Number(n).toLocaleString();
+
+function setScale() {
+  const s = Math.max(1, window.innerWidth / 2160);
+  document.documentElement.style.setProperty("--s", s.toFixed(3));
+  return s;
+}
+let scale = setScale();
+window.addEventListener("resize", () => { scale = setScale(); });
+
+async function api(view, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${view}: ${r.status}`);
+  return r.json();
+}
+
+function chartFont() {
+  return { family: "Inter, system-ui", size: Math.round(13 * scale), color: "#475569" };
+}
+function tickFont(color) {
+  return { color: color || "#64748b", size: Math.round(12 * scale) };
+}
+const darkLayout = (extra = {}) => ({
+  margin: { l: Math.round(45*scale), r: Math.round(15*scale), t: Math.round(20*scale), b: Math.round(45*scale) },
+  paper_bgcolor: "rgba(255,255,255,0)", plot_bgcolor: "rgba(255,255,255,0)",
+  font: chartFont(),
+  xaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), tickangle: -30, automargin: true, zeroline: false },
+  yaxis: { gridcolor: "#e2e8f0", tickfont: tickFont(), automargin: true, zeroline: false },
+  showlegend: false,
+  ...extra,
+});
+const cfg = { displayModeBar: false, responsive: true };
+
+async function build() {
+  const daily = await api("vw_daily_engagement", "order=day.asc&limit=10000");
+
+  const nDays = daily.length;
+  const lastDay = daily[nDays - 1].day;
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  const aiUsers = daily.map(r => r.users_with_ai_msgs || 0);
+  const aiAdoptionPct = daily.map((r, i) => r.active_users > 0 ? Math.round(1000 * aiUsers[i] / r.active_users) / 10 : 0);
+  const msgsPerAiUser = daily.map((r, i) => aiUsers[i] > 0 ? Math.round(10 * r.ai_messages / aiUsers[i]) / 10 : 0);
+
+  const totalAiMsgs = daily.reduce((s, r) => s + r.ai_messages, 0);
+  const totalAiUsers = aiUsers.reduce((s, v) => s + v, 0);
+  const avgAdoption = (aiAdoptionPct.reduce((s, v) => s + v, 0) / nDays).toFixed(1);
+  const avgMsgsPerUser = (totalAiMsgs / totalAiUsers).toFixed(1);
+  const peakAdoption = Math.max(...aiAdoptionPct).toFixed(1);
+  const peakMsgs = Math.max(...msgsPerAiUser).toFixed(1);
+  const avgDailyAiUsers = (totalAiUsers / nDays).toFixed(1);
+
+  // Chart 1: Daily AI users (bars) + adoption rate (line)
+  Plotly.newPlot("s10-chart1", [
+    { x: daily.map(r => r.day), y: aiUsers, type: "bar", name: "AI users",
+      marker: { color: "#10b981" },
+      hovertemplate: "%{x|%b %d}<br>%{y} AI users<extra></extra>" },
+    { x: daily.map(r => r.day), y: aiAdoptionPct, type: "scatter", mode: "lines+markers",
+      name: "% of DAU", yaxis: "y2",
+      line: { color: "#dc2626", width: Math.round(2.5*scale) }, marker: { size: Math.round(5*scale) },
+      hovertemplate: "%{x|%b %d}<br>%{y:.1f}% of active users<extra></extra>" },
+  ], darkLayout({
+    showlegend: true, legend: { orientation: "h", y: 1.18, x: 0, font: { color: "#475569", size: Math.round(12*scale) } },
+    margin: { l: Math.round(50*scale), r: Math.round(55*scale), t: Math.round(35*scale), b: Math.round(40*scale) },
+    yaxis: { title: "AI users", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
+    yaxis2: { overlaying: "y", side: "right", ticksuffix: "%",
+              tickfont: tickFont("#dc2626"), title: "% of DAU",
+              titlefont: { color: "#dc2626" }, automargin: true, gridcolor: "transparent" },
+  }), cfg);
+
+  // Chart 2: Messages per AI user per day
+  Plotly.newPlot("s10-chart2", [{
+    x: daily.map(r => r.day), y: msgsPerAiUser,
+    type: "scatter", mode: "lines+markers",
+    line: { color: "#10b981", width: Math.round(2.5*scale) }, marker: { size: Math.round(5*scale) },
+    fill: "tozeroy", fillcolor: "rgba(16,185,129,0.08)",
+    hovertemplate: "%{x|%b %d}<br>%{y:.1f} msgs/user<extra></extra>",
+  }], darkLayout({
+    yaxis: { title: "Messages per AI user", gridcolor: "#e2e8f0", automargin: true, tickfont: tickFont() },
+  }), cfg);
+
+  // Panel
+  document.getElementById("s10-panel").innerHTML = `
+    <div class="panel-header">
+      <h2>AI Engagement</h2>
+    </div>
+    <div class="panel-body">
+      <div class="narrative">
+        <p>On average, <span class="stat green">${avgDailyAiUsers}</span> users per day interact with the AI coach, representing <span class="stat">${avgAdoption}%</span> of daily active users. Adoption has peaked at <span class="stat green">${peakAdoption}%</span>.</p>
+        <p>AI users send an average of <span class="stat green">${avgMsgsPerUser}</span> messages per session, peaking at <span class="stat">${peakMsgs}</span> — indicating meaningful, multi-turn conversations rather than one-off interactions. <span class="stat green">${fmt(totalAiMsgs)}</span> total AI messages sent to date.</p>
+      </div>
+    </div>
+    <div class="panel-footer">BTTB.ai · ${fmtDate(lastDay)} · ${nDays} days of data</div>`;
+}
+
+build().catch(e => console.error(e));
+</script>
+</body>
+</html>

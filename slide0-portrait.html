@@ -121,7 +121,10 @@
     <h3>Summary metrics</h3>
     <div class="kpi-grid" id="kpi-grid"></div>
     <div class="chart-area" id="s0-charts" style="display:flex; flex-direction:column; gap:calc(8px * var(--s)); flex:2; margin-top:calc(8px * var(--s));">
-      <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center;" id="s0-chart1"></div>
+      <div style="flex:1; min-height:0; display:flex; flex-direction:row; gap:calc(8px * var(--s));">
+        <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center;" id="s0-chart1"></div>
+        <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart3"></div>
+      </div>
       <div style="flex:1; min-height:0; overflow:hidden;" id="s0-chart2"></div>
     </div>
   </div>
@@ -250,7 +253,7 @@ async function build() {
 
   const funnelDiv = document.getElementById("s0-chart1");
   const funnelInner = document.createElement("div");
-  funnelInner.style.cssText = `width:65%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
+  funnelInner.style.cssText = `width:90%; display:flex; flex-direction:column; align-items:center; gap:calc(6px * ${scale})`;
   funnelDiv.appendChild(funnelInner);
   funnelInner.innerHTML = [
     { label: "Total Users", value: fmt(totalSignups), pct: "100%", width: "100%", color: "#3b82f6" },
@@ -268,6 +271,30 @@ async function build() {
     line: { color: "#3b82f6", width: Math.round(2*scale) }, fillcolor: "rgba(59,130,246,0.08)",
   }], darkLayout({ margin:{l:Math.round(50*scale),r:Math.round(20*scale),t:Math.round(10*scale),b:Math.round(40*scale)},
     yaxis:{title:"DAU",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont()} }), cfg);
+
+  // ===== User growth (cumulative by month) =====
+  const monthMap = new Map();
+  signups.forEach(r => {
+    const m = r.signup_day.slice(0, 7);
+    monthMap.set(m, (monthMap.get(m) || 0) + r.signups);
+  });
+  const months = [...monthMap.keys()].sort();
+  let cumul = 0;
+  const cumulVals = months.map(m => { cumul += monthMap.get(m); return cumul; });
+  const monthLabels = months.map(m => {
+    const [y, mo] = m.split("-");
+    return new Date(+y, +mo - 1).toLocaleDateString("en-US", { month: "short" });
+  });
+  Plotly.newPlot("s0-chart3", [{
+    x: monthLabels, y: cumulVals,
+    type: "scatter", mode: "lines+markers+text",
+    line: { color: "#3b82f6", width: Math.round(2.5*scale) },
+    marker: { size: Math.round(6*scale), color: "#3b82f6" },
+    text: cumulVals.map(v => fmt(v)), textposition: "top center",
+    textfont: { size: Math.round(11*scale), color: "#475569" },
+    hovertemplate: "%{x}<br>%{y:,} total users<extra></extra>",
+  }], darkLayout({ margin:{l:Math.round(45*scale),r:Math.round(30*scale),t:Math.round(30*scale),b:Math.round(40*scale)},
+    yaxis:{title:"Total users",gridcolor:"#e2e8f0",automargin:true,tickfont:tickFont(),zeroline:false} }), cfg);
 
   // ===== Takeaways panel (from Slide 8) =====
   document.getElementById("s0-panel").innerHTML = `

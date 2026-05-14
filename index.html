@@ -222,6 +222,7 @@
   <div class="card"><h3>New signups per day</h3><div id="chart-signups" class="chart"></div></div>
   <div class="card"><h3>Spiritual level distribution (P1–P4)</h3><div id="chart-levels" class="chart"></div></div>
   <div class="card"><h3>Engagement funnel</h3><div id="chart-funnel-users" class="chart" style="height:200px;"></div></div>
+  <div class="card"><h3>Total user growth (cumulative)</h3><div id="chart-user-growth" class="chart"></div></div>
 </div>
 
 <h2>Content</h2>
@@ -743,6 +744,28 @@ async function load() {
       <span style="font-size:14px; font-weight:600;">${t.label}</span>
       <span style="font-size:20px; font-weight:800;">${t.value} <span style="font-size:12px; opacity:0.85;">${t.pct}</span></span>
     </div>`).join("");
+
+    // User growth by month (cumulative)
+    const monthMap = new Map();
+    signups.forEach(r => {
+      const m = r.signup_day.slice(0, 7); // "2026-01"
+      monthMap.set(m, (monthMap.get(m) || 0) + r.signups);
+    });
+    const months = [...monthMap.keys()].sort();
+    let cumul = 0;
+    const cumulVals = months.map(m => { cumul += monthMap.get(m); return cumul; });
+    const monthLabels = months.map(m => {
+      const [y, mo] = m.split("-");
+      return new Date(+y, +mo - 1).toLocaleDateString("en-US", { month: "short" });
+    });
+    Plotly.newPlot("chart-user-growth", [{
+      x: monthLabels, y: cumulVals,
+      type: "scatter", mode: "lines+markers+text",
+      line: { color: BRAND, width: 3 }, marker: { size: 8, color: BRAND },
+      text: cumulVals.map(v => fmt(v)), textposition: "top center",
+      textfont: { size: 12, color: "#475569" },
+      hovertemplate: "%{x}<br>%{y:,} total users<extra></extra>",
+    }], layout({ yaxis: { title: "Total users", gridcolor: "#e2e8f0", zeroline: false } }), config);
 
     // Top videos table
     const top = videos.slice(0, 15);

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Over 50 Advantage — Bulk Church Orders | Back to the Bible</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #3f5a61;
+    --navy2:  #2d4248;
+    --gold:   #29b8b8;
+    --gold2:  #22a0a0;
+    --cream:  #f7f9f9;
+    --text:   #21201e;
+    --muted:  #5a5a5a;
+    --border: #d8e2e3;
+    --green:  #51a9ad;
+    --teal:   #51a9ad;
+  }
+
+  body { font-family: 'Inter', sans-serif; color: var(--text); background: #fff; line-height: 1.6; }
+
+  /* ── UTILITIES ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 80px 0; }
+  .section-sm { padding: 56px 0; }
+  .text-center { text-align: center; }
+  .serif { font-family: 'Merriweather', serif; }
+  .gold { color: var(--gold); }
+  .navy { color: var(--navy); }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--navy2);
+    color: #fff;
+    text-align: center;
+    padding: 10px 24px;
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+  .topbar strong { color: var(--gold); }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo { color: #fff; font-family: 'Merriweather', serif; font-size: 18px; font-weight: 700; text-decoration: none; }
+  .logo span { color: var(--gold); }
+  nav a.nav-cta {
+    background: var(--gold);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  nav a.nav-cta:hover { background: var(--gold2); }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy2) 0%, var(--navy) 60%, #24406b 100%);
+    color: #fff;
+    padding: 80px 24px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-inner { position: relative; max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: 1fr 280px; gap: 48px; align-items: center; }
+  .hero-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+  .hero h1 { font-family: 'Merriweather', serif; font-size: clamp(28px, 4vw, 44px); line-height: 1.2; font-weight: 900; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero-sub { font-size: 17px; color: rgba(255,255,255,.82); margin-bottom: 32px; max-width: 520px; }
+  .hero-cta-group { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background .2s, transform .15s;
+    box-shadow: 0 4px 16px rgba(201,151,58,.35);
+  }
+  .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-block;
+    border: 2px solid rgba(255,255,255,.4);
+    transition: border-color .2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,.8); }
+  .hero-book { position: relative; }
+  .hero-book img, .hero-book .book-placeholder {
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  .book-placeholder {
+    background: linear-gradient(160deg, #2a4a7a, #1a2f4e);
+    aspect-ratio: 2/3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    text-align: center;
+    border: 1px solid rgba(201,151,58,.3);
+  }
+  .book-placeholder .bp-tag { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+  .book-placeholder .bp-title { font-family: 'Merriweather', serif; font-size: 22px; font-weight: 900; color: #fff; line-height: 1.25; margin-bottom: 12px; }
+  .book-placeholder .bp-author { font-size: 13px; color: rgba(255,255,255,.6); }
+  .hero-proof { display: flex; gap: 28px; margin-top: 28px; flex-wrap: wrap; }
+  .proof-item { font-size: 13px; color: rgba(255,255,255,.7); display: flex; align-items: center; gap: 6px; }
+  .proof-item::before { content: '✓'; color: var(--gold); font-weight: 700; }
+
+  /* ── PROBLEM STRIP ── */
+  .problem-strip {
+    background: var(--cream);
+    border-top: 3px solid var(--gold);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px;
+  }
+  .problem-strip h2 { font-family: 'Merriweather', serif; font-size: clamp(20px, 3vw, 28px); color: var(--navy); text-align: center; margin-bottom: 36px; }
+  .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .problem-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+  .problem-card .pc-icon { font-size: 28px; margin-bottom: 12px; }
+  .problem-card h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .problem-card p { font-size: 14px; color: var(--muted); }
+
+  /* ── WHO THIS IS FOR ── */
+  .who { background: #fff; }
+  .who h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 32px); color: var(--navy); margin-bottom: 12px; }
+  .who-intro { font-size: 17px; color: var(--muted); margin-bottom: 40px; max-width: 620px; }
+  .who-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .who-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .who-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold); }
+  .who-card h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .who-card p { font-size: 14px; color: var(--muted); }
+  .who-card .who-tag { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+
+  /* ── WHAT'S INCLUDED ── */
+  .whats-in { background: var(--cream); }
+  .whats-in h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 32px); color: var(--navy); text-align: center; margin-bottom: 8px; }
+  .whats-in .sub { text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 48px; }
+  .include-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .include-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    display: flex;
+    gap: 16px;
+  }
+  .include-icon { font-size: 32px; flex-shrink: 0; }
+  .include-card h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .include-card p { font-size: 14px; color: var(--muted); }
+  .include-card .badge {
+    display: inline-block;
+    background: #e6f4f5;
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  /* ── TIERS ── */
+  .tiers { background: var(--navy); color: #fff; }
+  .tiers h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 34px); text-align: center; margin-bottom: 8px; }
+  .tiers .sub { text-align: center; color: rgba(255,255,255,.65); font-size: 16px; margin-bottom: 52px; }
+  .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; align-items: stretch; }
+  .tier-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: 36px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .tier-card.featured {
+    background: rgba(201,151,58,.12);
+    border-color: var(--gold);
+    transform: none;
+  }
+  .featured-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tier-name { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .tier-label { font-family: 'Merriweather', serif; font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+  .tier-qty { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 20px; }
+  .tier-price { font-size: 36px; font-weight: 700; margin-bottom: 4px; line-height: 1; }
+  .tier-price span { font-size: 16px; font-weight: 400; color: rgba(255,255,255,.55); }
+  .tier-savings { font-size: 13px; color: #7ecfd2; margin-bottom: 24px; font-weight: 600; }
+  .tier-list { list-style: none; flex: 1; margin-bottom: 28px; }
+  .tier-list li { font-size: 14px; color: rgba(255,255,255,.8); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.07); display: flex; align-items: flex-start; gap: 8px; }
+  .tier-list li::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .tier-cta {
+    display: block;
+    text-align: center;
+    padding: 13px 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all .2s;
+    border: 2px solid rgba(255,255,255,.3);
+    color: #fff;
+  }
+  .tier-cta:hover { border-color: var(--gold); color: var(--gold); }
+  .tier-card.featured .tier-cta {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(201,151,58,.4);
+  }
+  .tier-card.featured .tier-cta:hover { background: var(--gold2); }
+
+  /* ── ARNIE SECTION ── */
+  .arnie { background: var(--cream); }
+  .arnie-inner { display: grid; grid-template-columns: 260px 1fr; gap: 56px; align-items: start; }
+  .arnie-photo {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,.15);
+  }
+  .arnie-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  .arnie-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+  .arnie h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 30px); color: var(--navy); margin-bottom: 16px; line-height: 1.3; }
+  .arnie p { font-size: 16px; color: var(--muted); margin-bottom: 16px; }
+  .arnie-topics { margin: 24px 0; }
+  .arnie-topics h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+  .topic-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .topic-tag {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .arnie-note {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: 4px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 24px;
+    font-style: italic;
+  }
+
+  /* ── BTTB AI STRIP ── */
+  .bttbai-strip {
+    background: linear-gradient(135deg, var(--navy) 0%, #24406b 100%);
+    color: #fff;
+    padding: 60px 24px;
+  }
+  .bttbai-inner { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; max-width: 860px; margin: 0 auto; }
+  .bttbai-strip h2 { font-family: 'Merriweather', serif; font-size: clamp(20px, 3vw, 28px); margin-bottom: 12px; }
+  .bttbai-strip h2 span { color: var(--gold); }
+  .bttbai-strip p { font-size: 15px; color: rgba(255,255,255,.75); max-width: 520px; }
+  .bttbai-badge {
+    background: rgba(201,151,58,.15);
+    border: 1px solid rgba(201,151,58,.4);
+    border-radius: 12px;
+    padding: 20px 28px;
+    text-align: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .bttbai-badge .bb-label { font-size: 12px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .bttbai-badge .bb-url { font-size: 20px; font-weight: 700; color: var(--gold); }
+  .bttbai-badge .bb-sub { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+  /* ── HOW IT WORKS ── */
+  .how { background: #fff; }
+  .how h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 32px); color: var(--navy); text-align: center; margin-bottom: 48px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; counter-reset: step; }
+  .step { text-align: center; padding: 32px 20px; position: relative; }
+  .step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--border);
+  }
+  .step-num {
+    width: 48px;
+    height: 48px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 auto 16px;
+    font-family: 'Merriweather', serif;
+  }
+  .step h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .step p { font-size: 13px; color: var(--muted); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials { background: var(--cream); }
+  .testimonials h2 { font-family: 'Merriweather', serif; font-size: clamp(20px, 3vw, 28px); color: var(--navy); text-align: center; margin-bottom: 40px; }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .testi-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+  }
+  .testi-stars { color: var(--gold); font-size: 14px; margin-bottom: 12px; }
+  .testi-card blockquote { font-size: 15px; color: var(--text); font-style: italic; line-height: 1.65; margin-bottom: 16px; }
+  .testi-card blockquote::before { content: '\201C'; font-size: 40px; color: var(--gold); line-height: 0; vertical-align: -14px; margin-right: 2px; font-family: 'Merriweather', serif; }
+  .testi-author { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .testi-role { font-size: 12px; color: var(--muted); }
+
+  /* ── FAQ ── */
+  .faq { background: #fff; }
+  .faq h2 { font-family: 'Merriweather', serif; font-size: clamp(22px, 3vw, 32px); color: var(--navy); text-align: center; margin-bottom: 40px; }
+  .faq-list { max-width: 700px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .faq-item h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .faq-item p { font-size: 15px; color: var(--muted); }
+
+  /* ── FINAL CTA ── */
+  .final-cta {
+    background: linear-gradient(135deg, var(--navy2) 0%, var(--navy) 100%);
+    color: #fff;
+    text-align: center;
+    padding: 88px 24px;
+  }
+  .final-cta h2 { font-family: 'Merriweather', serif; font-size: clamp(24px, 4vw, 40px); margin-bottom: 16px; }
+  .final-cta h2 em { font-style: normal; color: var(--gold); }
+  .final-cta p { font-size: 17px; color: rgba(255,255,255,.75); margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; }
+  .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .final-cta .trust-line { font-size: 13px; color: rgba(255,255,255,.45); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy2);
+    color: rgba(255,255,255,.5);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: 13px;
+  }
+  footer a { color: rgba(255,255,255,.6); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-book { max-width: 220px; margin: 0 auto; }
+    .arnie-inner { grid-template-columns: 1fr; }
+    .arnie-photo { aspect-ratio: 3/2; }
+    .bttbai-inner { grid-template-columns: 1fr; text-align: center; }
+    .step:not(:last-child)::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  Buy the book anywhere &nbsp;·&nbsp; Send us proof of purchase &nbsp;·&nbsp; <strong>We unlock your ministry kit instantly</strong>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="https://backtothebible.org" class="logo">Back to the <span>Bible</span></a>
+  <a href="#order" class="nav-cta">Order for Your Church →</a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Church Bulk Order Program</div>
+      <h1>Give Your <em>50+ Ministry</em><br>the Advantage They Need</h1>
+      <p class="hero-sub">
+        Equip your congregation with the tools to engage Scripture daily,
+        finish strong, and pass their faith on — through Arnie Cole's
+        research-backed book for the second half of life.
+      </p>
+      <div class="hero-cta-group">
+        <a href="#order" class="btn-primary">See Bulk Order Packages</a>
+        <a href="#arnie" class="btn-secondary">Bring Arnie to Speak</a>
+      </div>
+      <div class="hero-proof">
+        <div class="proof-item">Based on original research</div>
+        <div class="proof-item">Free Discussion Guide included</div>
+        <div class="proof-item">bttb.ai reading plan for every reader</div>
+      </div>
+    </div>
+    <div class="hero-book">
+      <img src="over50-images/book-3d.png" alt="The Over-50 Advantage book by Arnie Cole &amp; Rick Lawrence" style="width:100%;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.55));" />
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROBLEM STRIP ══ -->
+<div class="problem-strip">
+  <div class="container">
+    <h2>Your 50+ congregation is your most committed — are you giving them what they need?</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="pc-icon">📖</div>
+        <h3>Scripture engagement drops in the second half of life</h3>
+        <p>Research shows most believers plateau or drift from daily Bible engagement after 50 — without a clear reason to go deeper.</p>
+      </div>
+      <div class="problem-card">
+        <div class="pc-icon">🧭</div>
+        <h3>Discipleship resources ignore this season</h3>
+        <p>Most church curriculum is built for younger adults. Believers over 50 are left without tools tailored to where they actually are.</p>
+      </div>
+      <div class="problem-card">
+        <div class="pc-icon">🌱</div>
+        <h3>Legacy without intentionality fades</h3>
+        <p>The opportunity to disciple the next generation is greatest after 50 — but few have a framework to act on it before it's too late.</p>
+      </div>
+      <div class="problem-card">
+        <div class="pc-icon">⛪</div>
+        <h3>Pastors need a turnkey program, not more prep work</h3>
+        <p>A great book isn't enough. Churches need sermon guides, discussion questions, and a digital follow-up plan that works together.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WHO THIS IS FOR ══ -->
+<section class="who section">
+  <div class="container">
+    <h2 class="serif">This program was built for you if…</h2>
+    <p class="who-intro">Whether you lead a congregation, a ministry, or a senior living community, this is your ready-to-run discipleship series.</p>
+    <div class="who-grid">
+      <div class="who-card">
+        <div class="who-tag">Churches</div>
+        <h3>Pastors &amp; Senior Pastors</h3>
+        <p>Run a 6-week sermon series with everything you need — preaching guide, discussion questions, and a digital plan your congregation keeps using after Sunday.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Churches</div>
+        <h3>Small Group &amp; 50+ Ministry Directors</h3>
+        <p>A complete small-group study built around the book, with a free facilitator's guide and weekly Bible reading plan on bttb.ai.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Ministry Networks</div>
+        <h3>Denominational &amp; Associational Leaders</h3>
+        <p>Equip a cohort of pastors or churches across your district. We'll customize bulk pricing and a co-branded discussion guide for your network.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Senior Living</div>
+        <h3>Chaplains &amp; Retirement Community Directors</h3>
+        <p>Bring a speaker event and reading program to your residents. The Over 50 Advantage speaks directly to where your community is — and where they want to go.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Education</div>
+        <h3>Bible Colleges &amp; Seminaries</h3>
+        <p>Use the research behind the book in discipleship or evangelism courses. Send proof of purchase and we'll unlock a faculty resource kit.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Events</div>
+        <h3>Christian Conference Organizers</h3>
+        <p>The book as a conference take-home is a proven engagement tool. Add Arnie as a keynote speaker for the complete package.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHAT'S INCLUDED ══ -->
+<section class="whats-in section">
+  <div class="container">
+    <h2>Buy the book. Unlock a complete discipleship system.</h2>
+    <p class="sub">Your purchase unlocks a ready-to-run ministry kit — everything your church needs from Sunday sermon to small group to daily devotion.</p>
+    <div class="include-grid">
+      <div class="include-card">
+        <div class="include-icon">📚</div>
+        <div>
+          <h3>The Book</h3>
+          <p>Research-backed, readable, and built for the realities of life after 50. Combines original data with Scriptural grounding on discipleship, legacy, and daily faith.</p>
+        </div>
+      </div>
+      <div class="include-card">
+        <div class="include-icon">💬</div>
+        <div>
+          <h3>Free Discussion Guide</h3>
+          <p>A downloadable PDF with a 6-week reading schedule, 4 discussion questions per chapter, and "go deeper" prompts. Ready to print or share digitally.</p>
+          <span class="badge">Free with every order</span>
+        </div>
+      </div>
+      <div class="include-card">
+        <div class="include-icon">📱</div>
+        <div>
+          <h3>bttb.ai Bible Reading Plan</h3>
+          <p>A custom 30-day reading plan that pairs with the book's themes. Your congregation uses it daily — for free — long after the sermon series ends.</p>
+          <span class="badge">Free — no subscription</span>
+        </div>
+      </div>
+      <div class="include-card">
+        <div class="include-icon">🎤</div>
+        <div>
+          <h3>Pastoral Preaching Guide <em style="font-style:normal;font-size:12px;color:var(--muted)">(25+ orders)</em></h3>
+          <p>A sermon outline and teaching guide so your pastor can preach directly from the book with minimal prep. Includes key research findings and Scripture anchors.</p>
+          <span class="badge">Included at 25+ books</span>
+        </div>
+      </div>
+      <div class="include-card">
+        <div class="include-icon">🖼️</div>
+        <div>
+          <h3>Church Promo Kit <em style="font-style:normal;font-size:12px;color:var(--muted)">(50+ orders)</em></h3>
+          <p>Bulletin inserts, social media graphics, and a slide deck for your announcement screen — everything you need to promote the series.</p>
+          <span class="badge">Included at 50+ books</span>
+        </div>
+      </div>
+      <div class="include-card">
+        <div class="include-icon">🎙️</div>
+        <div>
+          <h3>Arnie Cole Live <em style="font-style:normal;font-size:12px;color:var(--muted)">(200+ orders)</em></h3>
+          <p>Bring Arnie to speak at your church, conference, or event. A 45-minute keynote + Q&amp;A and book signing that launches or closes your series.</p>
+          <span class="badge">Speaker package available</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LIFESTYLE STRIP ══ -->
+<div style="width:100%;overflow:hidden;max-height:420px;">
+  <img src="over50-images/book-mockups.png" alt="The Over-50 Advantage book mockups" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
+</div>
+
+<!-- ══ TIERS / ORDER ══ -->
+<section class="tiers section" id="order">
+  <div class="container-wide">
+    <h2>Choose Your Package</h2>
+    <p class="sub">Buy the book anywhere books are sold. Send us your proof of purchase and we'll unlock your ministry kit — instantly, digitally, at no extra cost.</p>
+    <div class="tier-grid">
+
+      <!-- STARTER -->
+      <div class="tier-card">
+        <div class="tier-name">Starter</div>
+        <div class="tier-label">Small Group Kit</div>
+        <div class="tier-qty">Purchase 10–49 copies</div>
+        <div class="tier-price" style="font-size:22px;margin-bottom:2px;">Buy anywhere</div>
+        <div class="tier-savings">Amazon · CBD · Bookstore · backtothebible.org</div>
+        <ul class="tier-list">
+          <li>Discussion Guide PDF (6-week plan + questions)</li>
+          <li>bttb.ai 30-Day Reading Plan for your group</li>
+          <li>Digital delivery — no waiting</li>
+        </ul>
+        <a href="#contact" class="tier-cta">Claim Your Kit</a>
+      </div>
+
+      <!-- CHURCH SERIES — FEATURED -->
+      <div class="tier-card featured">
+        <div class="featured-badge">Most Popular</div>
+        <img src="over50-images/book-flat.png" alt="The Over-50 Advantage" style="width:90px;display:block;margin:0 auto 16px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4));" />
+        <div class="tier-name">Church Series</div>
+        <div class="tier-label">Congregation Kit</div>
+        <div class="tier-qty">Purchase 50–199 copies</div>
+        <div class="tier-price" style="font-size:22px;margin-bottom:2px;">Buy anywhere</div>
+        <div class="tier-savings">Amazon · CBD · Bookstore · backtothebible.org</div>
+        <ul class="tier-list">
+          <li>Discussion Guide PDF</li>
+          <li>bttb.ai 30-Day Reading Plan</li>
+          <li>Pastoral Preaching Guide (sermon outline + slides)</li>
+          <li>Church Promo Kit (graphics + bulletin inserts)</li>
+          <li>Digital delivery — no waiting</li>
+        </ul>
+        <a href="#contact" class="tier-cta">Claim Your Kit</a>
+      </div>
+
+      <!-- SPEAKER PACKAGE -->
+      <div class="tier-card">
+        <div class="tier-name">Full Program</div>
+        <div class="tier-label">Speaker Package</div>
+        <div class="tier-qty">Purchase 200+ copies</div>
+        <div class="tier-price" style="font-size:22px;margin-bottom:2px;">Buy anywhere</div>
+        <div class="tier-savings">Amazon · CBD · Bookstore · backtothebible.org</div>
+        <ul class="tier-list">
+          <li>Discussion Guide PDF</li>
+          <li>bttb.ai 30-Day Reading Plan</li>
+          <li>Pastoral Preaching Guide</li>
+          <li>Church Promo Kit</li>
+          <li>Arnie Cole keynote + Q&amp;A + book signing</li>
+          <li>Priority speaker scheduling</li>
+        </ul>
+        <a href="#contact" class="tier-cta">Claim Your Kit + Speaker</a>
+      </div>
+
+    </div>
+    <p style="text-align:center;margin-top:32px;font-size:14px;color:rgba(255,255,255,.45);">
+      Leading a denominational network or conference of 500+? <a href="#contact" style="color:var(--gold);text-decoration:none;">Contact us for a custom kit →</a>
+    </p>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section class="how section">
+  <div class="container">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Buy the book</h3>
+        <p>Purchase your copies anywhere books are sold — Amazon, CBD, a local bookstore, or backtothebible.org.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Send proof of purchase</h3>
+        <p>Email us your order confirmation or receipt. We verify your quantity and unlock your ministry kit within one business day.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Receive your kit instantly</h3>
+        <p>You get a download link for everything — discussion guide, preaching guide, promo graphics, and your bttb.ai reading plan code.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Run your series</h3>
+        <p>Launch your 6-week program. Your congregation keeps using bttb.ai daily long after the series ends.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ARNIE SECTION ══ -->
+<section class="arnie section" id="arnie">
+  <div class="container">
+    <div class="arnie-inner">
+      <div class="arnie-photo">
+        <img src="over50-images/arnie.jpg" alt="Dr. Arnie Cole, CEO of Back to the Bible" />
+      </div>
+      <div>
+        <div class="arnie-eyebrow">Meet the Author &amp; Speaker</div>
+        <h2>Dr. Arnie Cole — Researcher, Disciple-Maker, and Voice for the Second Half of Life</h2>
+        <p>
+          Dr. Arnie Cole is the CEO of Back to the Bible and a leading researcher
+          on spiritual development and Bible engagement. His work has shaped how
+          thousands of churches think about discipleship — at every stage of life.
+        </p>
+        <p>
+          In <em>Over 50 Advantage</em>, Arnie draws on original research to show
+          why the second half of life is not a spiritual plateau — it is an
+          unparalleled opportunity to go deeper, give more, and leave a legacy
+          that lasts beyond your lifetime.
+        </p>
+        <div class="arnie-topics">
+          <h4>Available keynote topics:</h4>
+          <div class="topic-tags">
+            <span class="topic-tag">The Over 50 Advantage</span>
+            <span class="topic-tag">Spiritual Fitness for the Soul</span>
+            <span class="topic-tag">Finishing Strong</span>
+            <span class="topic-tag">Discipleship &amp; Legacy</span>
+            <span class="topic-tag">Daily Bible Engagement</span>
+            <span class="topic-tag">What Went Wrong with Discipleship</span>
+          </div>
+        </div>
+        <div class="arnie-note">
+          Speaker availability is limited. Bulk orders of 200+ books include
+          speaker inquiry priority. Contact us early to hold your date.
+        </div>
+        <a href="#contact" class="btn-primary" style="margin-top:20px;display:inline-block;">Inquire About a Speaking Engagement</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BTTB.AI STRIP ══ -->
+<div class="bttbai-strip">
+  <div class="bttbai-inner">
+    <div>
+      <h2>The book starts the conversation.<br><span>bttb.ai</span> keeps it going — every day.</h2>
+      <p>
+        Back to the Bible's free daily discipleship platform gives every reader
+        a personalized Bible reading plan tied to the book's themes. No app to
+        download. No subscription. Just Scripture, every day — for free.
+        It's the "what do I do next?" answer your congregation needs.
+      </p>
+    </div>
+    <div class="bttbai-badge">
+      <div class="bb-label">Free for every reader</div>
+      <div class="bb-url">bttb.ai</div>
+      <div class="bb-sub">Daily Bible engagement platform</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="testimonials section">
+  <div class="container">
+    <h2>What pastors and ministry leaders are saying</h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>This was the first time in years our 50+ ministry had something written for them — not adapted for them. The discussion guide made our small group leaders' jobs easy. Our people are still using bttb.ai months later.</blockquote>
+        <div class="testi-author">Pastor David L.</div>
+        <div class="testi-role">Senior Pastor, Nebraska</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>We ordered 150 books and ran a six-week series. Arnie's research gave our people a framework they'd never had. The preaching guide saved me 3–4 hours of prep per week. I'd do it again in a heartbeat.</blockquote>
+        <div class="testi-author">Rev. Sandra M.</div>
+        <div class="testi-role">Lead Pastor, Senior Ministry Director, Ohio</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>Having Arnie speak at our conference was the highlight of the year. He connected with our 50+ attendees immediately — and the books sold out before he left the stage. We've already scheduled a return visit.</blockquote>
+        <div class="testi-author">James T.</div>
+        <div class="testi-role">Director, Regional Christian Conference, Texas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="faq section">
+  <div class="container">
+    <h2>Common Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>Where do I buy the books?</h3>
+        <p>Anywhere books are sold — Amazon, ChristianBook.com, your local bookstore, or directly at backtothebible.org. Buy at the best price you can find. Once you send us proof of purchase, we unlock your ministry kit regardless of where you bought.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What counts as proof of purchase?</h3>
+        <p>A screenshot or forwarded email of your order confirmation works perfectly — from Amazon, ChristianBook.com, or any retailer. We just need to see the quantity and your name. No receipt formatting required.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How quickly do I receive my ministry kit?</h3>
+        <p>Within one business day of sending your proof of purchase. You'll get a download link by email with everything included in your tier — discussion guide, preaching guide, promo kit, and your bttb.ai reading plan.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the bttb.ai reading plan really free for our whole congregation?</h3>
+        <p>Yes. bttb.ai is completely free for every reader — no subscription, no app required. It works in any browser. There are no per-seat costs or hidden fees.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I book Arnie for a speaking engagement?</h3>
+        <p>Speaker engagements are included with orders of 200+ books. Fill out the inquiry form below and our team will confirm Arnie's availability and work through logistics with you. Speaker slots fill up — we recommend reaching out 8–12 weeks in advance.</p>
+      </div>
+      <div class="faq-item">
+        <h3>We're a denominational network — can we get custom pricing?</h3>
+        <p>Absolutely. We offer custom pricing and co-branded materials for district offices, associations, and networks. Contact us directly to discuss your scope.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT / FINAL CTA ══ -->
+<section class="final-cta" id="contact">
+  <h2>Ready to equip your <em>50+ ministry?</em></h2>
+  <p>Fill out the form below and our team will follow up within one business day with your custom order quote, a review copy, or speaker availability.</p>
+  <div class="cta-group">
+    <a href="mailto:ministry@backtothebible.org?subject=Over 50 Advantage Bulk Order Inquiry" class="btn-primary">Email Us to Order</a>
+    <a href="tel:18007592425" class="btn-secondary">Call 1-800-759-2425</a>
+  </div>
+  <p class="trust-line">Back to the Bible · A trusted ministry partner since 1939</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Back to the Bible · <a href="https://backtothebible.org">backtothebible.org</a> · <a href="https://bttb.ai">bttb.ai</a> · 1-800-759-2425</p>
+</footer>
+
+</body>
+</html>

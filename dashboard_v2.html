@@ -289,17 +289,25 @@ const mFontSz = isMobile ? 9 : 11;
 const mTickAngle = isMobile ? -45 : -30;
 const mMargin = isMobile ? { l: 40, r: 20, t: 25, b: 55 } : { l: 50, r: 30, t: 30, b: 50 };
 
-const layout = (extra = {}) => ({
-  margin: mMargin,
-  paper_bgcolor: "white", plot_bgcolor: "white",
-  font: { family: "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui", size: isMobile ? 10 : 12 },
-  xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
-           tickangle: mTickAngle, automargin: true },
-  yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
-           automargin: true },
-  showlegend: false,
-  ...extra,
-});
+let _xRange = null; // set after each data load; locks all time-series charts to the data window
+
+const layout = (extra = {}) => {
+  const base = {
+    margin: mMargin,
+    paper_bgcolor: "white", plot_bgcolor: "white",
+    font: { family: "-apple-system, BlinkMacSystemFont, Segoe UI, system-ui", size: isMobile ? 10 : 12 },
+    xaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
+             tickangle: mTickAngle, automargin: true,
+             ...(_xRange ? { range: _xRange } : {}) },
+    yaxis: { gridcolor: "#f3f4f6", tickfont: { color: "#6b7280", size: mFontSz },
+             automargin: true },
+    showlegend: false,
+  };
+  // deep-merge xaxis so callers can still add range overrides or ticksuffix
+  const merged = { ...base, ...extra };
+  if (extra.xaxis) merged.xaxis = { ...base.xaxis, ...extra.xaxis };
+  return merged;
+};
 const config = { displayModeBar: false, responsive: true };
 
 function pivotLine(pivotDate, label, color) {
@@ -313,18 +321,23 @@ function pivotLine(pivotDate, label, color) {
   };
 }
 
-function multiPivot(pivots) {
-  // pivots: [{date, label, color}]
+function multiPivot(pivots, rangeStart, rangeEnd) {
+  // Only render lines that fall within [rangeStart, rangeEnd]
+  const visible = pivots.filter(p =>
+    (!rangeStart || p.date >= rangeStart) && (!rangeEnd || p.date <= rangeEnd)
+  );
+  if (!visible.length) return {};
   return {
-    shapes: pivots.map(p => ({ type: "line", x0: p.date, x1: p.date, y0: 0, y1: 1, yref: "paper",
+    shapes: visible.map(p => ({ type: "line", x0: p.date, x1: p.date, y0: 0, y1: 1, yref: "paper",
                line: { color: p.color || WARN, width: 2, dash: "dash" } })),
-    annotations: pivots.map(p => ({ x: p.date, y: 1.05, yref: "paper", text: p.label,
+    annotations: visible.map(p => ({ x: p.date, y: 1.05, yref: "paper", text: p.label,
                     showarrow: false, font: { size: 11, color: p.color || WARN },
                     yanchor: "bottom", xanchor: "left" })),
   };
 }
 
 async function load() {
+  _xRange = null;
   const meta = document.getElementById("meta");
   meta.textContent = "Loading…";
 
@@ -346,14 +359,19 @@ async function load() {
       api("vw_daily_program_engagement", `${dq.join("&")}&order=day.asc&limit=50000`),
       api("vw_daily_content_depth", `${dq.join("&")}&order=day.asc&limit=10000`),
       api("vw_program_engagement", "order=starts.desc&limit=50"),
-      api("vw_daily_playlist_depth", `day=gte.2026-03-30&order=day.asc,depth_bucket.asc&limit=50000`),
-      api("vw_daily_daytype", `day=gte.2026-03-30&order=day.asc&limit=10000`),
+      api("vw_daily_playlist_depth", `${dq.join("&")}&order=day.asc,depth_bucket.asc&limit=50000`),
+      api("vw_daily_daytype", `${dq.join("&")}&order=day.asc&limit=10000`),
     ]);
 
     if (!daily.length) {
       meta.innerHTML = '<span class="err">No data in the selected window.</span>';
       return;
     }
+
+    const dataStart = daily[0].day;
+    const dataEnd   = daily[daily.length - 1].day;
+    _xRange = [dataStart, dataEnd];
+    const mp = (pivots) => multiPivot(pivots, dataStart, dataEnd);
 
     // KPIs
     const totalSignups = signups.reduce((s, r) => s + r.signups, 0);
@@ -385,7 +403,7 @@ async function load() {
       type: "scatter", mode: "lines", fill: "tozeroy",
       line: { color: BRAND, width: 2.4 }, fillcolor: "rgba(37,99,235,0.12)",
       hovertemplate: "%{x|%b %d}<br>%{y} active users<extra></extra>",
-    }], layout(multiPivot([
+    }], layout(mp([
       { date: PIVOT, label: "Mar 30 playlist", color: WARN },
       { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
     ])), config);
@@ -398,7 +416,7 @@ async function load() {
         type: "bar", name: "Completed", marker: { color: ACCENT } },
     ], layout({ barmode: "overlay", showlegend: true,
                 legend: { orientation: "h", y: 1.1, x: 0 },
-                ...multiPivot([
+                ...mp([
                   { date: PIVOT, label: "Mar 30", color: WARN },
                   { date: PIVOT_PROMO, label: "Jun 22", color: PROMO_COLOR },
                 ]) }), config);
@@ -434,7 +452,7 @@ async function load() {
       x: daily.map(r => r.day), y: daily.map(r => r.ai_messages),
       type: "bar", marker: { color: "#8b5cf6" },
       hovertemplate: "%{x|%b %d}<br>%{y} messages<extra></extra>",
-    }], layout(multiPivot([
+    }], layout(mp([
       { date: PIVOT, label: "Mar 30", color: WARN },
       { date: PIVOT_PROMO, label: "Jun 22", color: PROMO_COLOR },
     ])), config);
@@ -459,7 +477,7 @@ async function load() {
       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%",
                 tickfont: { color: "#dc2626", size: mFontSz }, title: isMobile ? "" : "% of DAU",
                 titlefont: { color: "#dc2626" }, automargin: true },
-      ...multiPivot([
+      ...mp([
         { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
       ]),
     }), config);
@@ -543,7 +561,7 @@ async function load() {
       </div>`;
 
     // Promo milestone charts (all-time data with Jun 22 line)
-    const promoLine = multiPivot([{ date: PIVOT_PROMO, label: "Jun 22 promo launch", color: PROMO_COLOR }]);
+    const promoLine = mp([{ date: PIVOT_PROMO, label: "Jun 22 promo launch", color: PROMO_COLOR }]);
 
     Plotly.newPlot("chart-dau-promo", [{
       x: daily.map(r => r.day), y: daily.map(r => r.active_users),
@@ -634,7 +652,7 @@ async function load() {
       </div>`;
 
     // Videos per user trend
-    const bothPivots = multiPivot([
+    const bothPivots = mp([
       { date: PIVOT, label: "Mar 30 playlist", color: WARN },
       { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
     ]);
@@ -855,7 +873,7 @@ async function load() {
       x: signups.map(r => r.signup_day), y: signups.map(r => r.signups),
       type: "bar", marker: { color: ACCENT },
       hovertemplate: "%{x|%b %d}<br>%{y} signups<extra></extra>",
-    }], layout(multiPivot([
+    }], layout(mp([
       { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
     ])), config);
 

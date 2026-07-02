@@ -271,10 +271,19 @@ const PROG_COLORS = {
   L1HC: "#a3a3a3", SFW: "#d4d4d4",
 };
 
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min — keeps Supabase egress low for boards/kiosks that reload often
+
 async function api(view, q = "") {
+  const cacheKey = `sb_cache:${view}?${q}`;
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+    if (cached && Date.now() - cached.t < CACHE_TTL_MS) return cached.d;
+  } catch (e) {}
   const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
   if (!r.ok) throw new Error(`${view}: ${r.status} ${await r.text()}`);
-  return r.json();
+  const data = await r.json();
+  try { localStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), d: data })); } catch (e) {}
+  return data;
 }
 
 function setKPIs(items) {

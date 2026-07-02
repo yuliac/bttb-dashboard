@@ -261,7 +261,7 @@ const PROG_COLORS = {
   L1HC: "#a3a3a3", SFW: "#d4d4d4",
 };
 
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min — keeps Supabase egress low for boards/kiosks that reload often
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h — caps Supabase requests to ~once/day regardless of how often the page reloads
 
 async function api(view, q = "") {
   const cacheKey = `sb_cache:${view}?${q}`;

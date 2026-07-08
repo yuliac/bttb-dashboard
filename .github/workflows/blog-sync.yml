@@ -1,0 +1,33 @@
+name: Blog sync (Wix -> Airtable)
+
+on:
+  schedule:
+    - cron: "17 13 * * *"   # ~08:17 America/Chicago daily
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Sync mode"
+        required: false
+        default: "window"
+        type: choice
+        options: [window, backfill]
+
+concurrency:
+  group: blog-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - name: Run sync
+        env:
+          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
+          AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT }}
+          SYNC_MODE: ${{ github.event.inputs.mode }}
+        run: python scripts/blog_sync.py

@@ -24,13 +24,14 @@ SITE_ID = os.environ.get("WIX_SITE_ID", "a3c9d14d-943f-4a77-9070-18f36a39d99e").
 BASE    = os.environ.get("AIRTABLE_BASE", "appnMeSbhbj9bIMJU").strip()
 BACKFILL = os.environ.get("SYNC_MODE", "").strip().lower() == "backfill"
 
-T = {"cat":"tbllwujbyV9d8jahW","auth":"tbljYzLRXGCOAUBhU","post":"tblDSSFzUN14Bdct4","cal":"tblTXmN7W0wnmocIQ"}
+T = {"cat":"tbllwujbyV9d8jahW","auth":"tbljYzLRXGCOAUBhU","post":"tblDSSFzUN14Bdct4","cal":"tblTXmN7W0wnmocIQ","tag":"tbl4IziUieFXejs4X"}
 F = {
     "cat_name":"fldSRAWYTmsBjjDGa","cat_wix":"fld3bB8Oo0JftmMOP","cat_role":"fld5rs0hKw2zE5Qs5","cat_count":"flddpF5G3QcEkanWb",
     "au_name":"fldIByuQC1RMWDOuO","au_wix":"fldnmNGQu0HVzEqlY","au_role":"fldRi9rgUpwHmKtMV","au_rota":"fldhUKz8EKVjuM68c",
     "p_title":"fldTphLZPTIFNhtHT","p_status":"fldsnLsXRhWdVPBmy","p_air":"fldpbiH2DGIgroiW0","p_url":"fldbIvvO29JH97Q5D",
     "p_slug":"fldveFBTywKZkvxzO","p_exc":"fldZitVGsBmOZJMLW","p_ttr":"fld4S9YSQJuRK7tL3","p_body":"fldDIWP1Zmkvzfhzm",
-    "p_wix":"fldCqWfBoTfs9R9tG","p_cat":"fldI1tu9Cwt8VBhx8","p_auth":"fldJrYc4xGUa6duzY",
+    "p_wix":"fldCqWfBoTfs9R9tG","p_cat":"fldI1tu9Cwt8VBhx8","p_auth":"fldJrYc4xGUa6duzY","p_tags":"fld3352E1SSAXhFPr",
+    "tag_name":"fldJcR1ZhbBD1sva8","tag_wix":"fldm63b4sRTIfyKDW","tag_count":"fldmw1z8RscEfZrnw",
     "c_slot":"fldq8D9pV0POveJ46","c_date":"flds9LLqGy7QNK4UM","c_wd":"fldNiLwMPAI8IRZVh","c_ecat":"fldHaJYQmuoMBvENI",
     "c_status":"fldU4mGqwYbgKVC0x","c_eauth":"fldgouU02fwl8FB8N","c_post":"fldHCOO9k12SptnSe",
 }
@@ -107,6 +108,19 @@ def sync_categories():
     print(f"categories: {len(cats)}")
     return m, {c["id"]:c["label"] for c in cats}
 
+def sync_tags():
+    tags=[]; offset=0
+    while True:
+        r=wix_get(f"/blog/v3/tags?paging.limit=100&paging.offset={offset}")
+        batch=r.get("tags",[]); tags+=batch
+        if len(batch)<100: break
+        offset+=len(batch)
+    recs=[{F["tag_name"]:t["label"],F["tag_wix"]:t["id"],F["tag_count"]:t.get("postCount",0)} for t in tags]
+    at_upsert(T["tag"],recs,[F["tag_wix"]])
+    m={r["fields"].get(F["tag_wix"]):r["id"] for r in at_list(T["tag"],[F["tag_wix"]])}
+    print(f"tags: {len(tags)}")
+    return m
+
 def member_name(mid, cache):
     if mid in cache: return cache[mid]
     try:
@@ -135,7 +149,8 @@ def fetch_all_posts():
         batch=r.get("posts",[])
         for p in batch:
             posts.append(dict(id=p.get("id"),title=p.get("title"),slug=p.get("slug"),memberId=p.get("memberId"),
-                categoryIds=p.get("categoryIds") or [],date=p.get("firstPublishedDate"),status="Published",
+                categoryIds=p.get("categoryIds") or [],tagIds=p.get("tagIds") or [],
+                date=p.get("firstPublishedDate"),status="Published",
                 excerpt=(p.get("excerpt") or "")[:900],ttr=p.get("minutesToRead"),
                 body=richtext_to_plain(p.get("richContent"))[:9000]))
         offset+=len(batch)
@@ -147,16 +162,19 @@ def fetch_all_posts():
         d=p.get("scheduledPublishDate")
         if not d or p.get("slug") in pub_slugs: continue
         posts.append(dict(id=p.get("id"),title=p.get("title"),slug=p.get("slug"),memberId=p.get("memberId"),
-            categoryIds=p.get("categoryIds") or [],date=d,status="Scheduled",excerpt="",ttr=p.get("minutesToRead"),body=""))
+            categoryIds=p.get("categoryIds") or [],tagIds=p.get("tagIds") or [],
+            date=d,status="Scheduled",excerpt="",ttr=p.get("minutesToRead"),body=""))
     return posts
 
-def sync_posts(posts, catmap, authmap):
+def sync_posts(posts, catmap, authmap, tagmap):
     recs=[]
     for p in posts:
         f={F["p_title"]:p["title"] or "(untitled)",F["p_status"]:p["status"],F["p_wix"]:p["id"]}
         if p["date"]: f[F["p_air"]]=p["date"]
         cids=[catmap[c] for c in p["categoryIds"] if c in catmap]
         if cids: f[F["p_cat"]]=cids
+        tids=[tagmap[t] for t in p.get("tagIds",[]) if t in tagmap]
+        if tids: f[F["p_tags"]]=tids
         aid=authmap.get(p["memberId"])
         if aid: f[F["p_auth"]]=[aid]
         if p["slug"]: f[F["p_slug"]]=p["slug"]; f[F["p_url"]]="https://www.backtothebible.org/post/"+p["slug"]
@@ -198,6 +216,7 @@ def sync_calendar(posts, id2label, authmap_by_nick):
 
 def main():
     catmap,id2label=sync_categories()
+    tagmap=sync_tags()
     posts=fetch_all_posts()
     print(f"fetched {len(posts)} posts (backfill={BACKFILL})")
     cache={}
@@ -205,7 +224,7 @@ def main():
     by_nick={}
     for mid,rid in authmap.items():
         nm=cache.get(mid,""); by_nick[NICK.get(nm,nm)]=rid
-    sync_posts(posts,catmap,authmap)
+    sync_posts(posts,catmap,authmap,tagmap)
     sync_calendar(posts,id2label,by_nick)
     print("done.")
 

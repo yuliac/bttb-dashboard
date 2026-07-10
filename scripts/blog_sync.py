@@ -27,7 +27,7 @@ BACKFILL = os.environ.get("SYNC_MODE", "").strip().lower() == "backfill"
 T = {"cat":"tbllwujbyV9d8jahW","auth":"tbljYzLRXGCOAUBhU","post":"tblDSSFzUN14Bdct4","cal":"tblTXmN7W0wnmocIQ","tag":"tbl4IziUieFXejs4X"}
 F = {
     "cat_name":"fldSRAWYTmsBjjDGa","cat_wix":"fld3bB8Oo0JftmMOP","cat_role":"fld5rs0hKw2zE5Qs5","cat_count":"flddpF5G3QcEkanWb",
-    "au_name":"fldIByuQC1RMWDOuO","au_wix":"fldnmNGQu0HVzEqlY","au_role":"fldRi9rgUpwHmKtMV","au_rota":"fldhUKz8EKVjuM68c",
+    "au_name":"fldIByuQC1RMWDOuO","au_wix":"fldnmNGQu0HVzEqlY","au_role":"fldRi9rgUpwHmKtMV","au_rota":"fldhUKz8EKVjuM68c","au_paused":"fldmZT1wkcAGzjo4B",
     "p_title":"fldTphLZPTIFNhtHT","p_status":"fldsnLsXRhWdVPBmy","p_air":"fldpbiH2DGIgroiW0","p_url":"fldbIvvO29JH97Q5D",
     "p_slug":"fldveFBTywKZkvxzO","p_exc":"fldZitVGsBmOZJMLW","p_ttr":"fld4S9YSQJuRK7tL3","p_body":"fldDIWP1Zmkvzfhzm",
     "p_wix":"fldCqWfBoTfs9R9tG","p_cat":"fldI1tu9Cwt8VBhx8","p_auth":"fldJrYc4xGUa6duzY","p_tags":"fld3352E1SSAXhFPr",
@@ -198,6 +198,10 @@ def sync_calendar(posts, id2label, authmap_by_nick):
             by_slot.setdefault((d,lbl),p["id"])
     wix2rec={r["fields"].get(F["p_wix"]):r["id"] for r in at_list(T["post"],[F["p_wix"]])}
     status_by={p["id"]:p["status"] for p in posts}
+    paused_nicks=set()
+    for r in at_list(T["auth"],[F["au_name"],F["au_paused"]]):
+        if r["fields"].get(F["au_paused"]):
+            nm=r["fields"].get(F["au_name"],""); paused_nicks.add(NICK.get(nm,nm))
     recs=[]; d=start
     while d<=end:
         cat,nick=ROTA[d.weekday()]
@@ -208,6 +212,8 @@ def sync_calendar(posts, id2label, authmap_by_nick):
         pid=by_slot.get((d,cat))
         if pid and wix2rec.get(pid):
             f[F["c_status"]]=status_by.get(pid,"Published"); f[F["c_post"]]=[wix2rec[pid]]
+        elif nick in paused_nicks:
+            f[F["c_status"]]="Skipped / NA"
         else:
             f[F["c_status"]]="Not received"
         recs.append(f); d+=datetime.timedelta(days=1)

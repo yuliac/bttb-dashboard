@@ -92,7 +92,7 @@
 
   /* ---------- all-time strip ---------- */
   .alltime { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 14px; }
-  .at-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .at-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
   .at-val { font-family: Poppins, sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); }
   .at-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 
@@ -151,8 +151,9 @@
     .plevels h3 { font-size: 10.5px; }
     .plevels .cap { font-size: 8.5px; margin-bottom: 6px; }
     .alltime { padding-top: 8px; margin-bottom: 8px; }
-    .at-val { font-size: 13.5px; }
-    .at-label { font-size: 8px; }
+    .at-grid { gap: 6px; }
+    .at-val { font-size: 12.5px; }
+    .at-label { font-size: 7px; letter-spacing: .02em; }
     footer { font-size: 7.5px; line-height: 1.4; padding-top: 7px; }
   }
 </style>
@@ -222,7 +223,7 @@ function delta(cur, prev, pp = false) {
 
 /* ---------- SVG bar panel: one series, 12 weeks, focus week highlighted ---------- */
 function barPanel(rows, key, color, fmtVal) {
-  const W = 340, H = 118, padL = 4, padR = 4, padT = 15, padB = 19;
+  const W = 340, H = 108, padL = 4, padR = 4, padT = 14, padB = 18;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const max = Math.max(...rows.map(r => Number(r[key])), 1);
   const slot = plotW / rows.length;
@@ -271,7 +272,7 @@ function pLevelChart(levels) {
   const order = ["P1", "P2", "P3", "P4", "Unknown"];
   const rows = order.map(p => levels.find(l => l.p_level === p)).filter(Boolean);
   const total = rows.reduce((s, r) => s + Number(r.users), 0);
-  const W = 720, rowH = 22, gap = 5, padL = 92, padR = 116;
+  const W = 720, rowH = 20, gap = 4, padL = 92, padR = 116;
   const H = rows.length * (rowH + gap);
   const max = Math.max(...rows.map(r => Number(r.users)), 1);
   const plotW = W - padL - padR;
@@ -309,20 +310,25 @@ function bottomLine(last, prior, tot, trend) {
   const n = trend.length;
 
   // 1. Reach — week-over-week is thin context; rank vs the 12-week range is not.
+  //    Phrase the WoW move from the data; never hard-code a direction.
   const reachSt = standing(trend, "engaged_users", last.engaged_users);
+  const rD = delta(last.engaged_users, prior.engaged_users);
+  const wow = rD.cls === "pos" ? `up ${Math.abs(rD.num).toFixed(1)}% on the week before`
+            : rD.cls === "neg" ? `down ${Math.abs(rD.num).toFixed(1)}% on the week before`
+            : "level with the week before";
   out.push(`<b>${fmt(last.engaged_users)} people engaged</b> with the platform last week `
-    + `(${Number(last.avg_daily_engaged).toFixed(1)} a day) — level with the week before, and `
-    + `${reachSt.above ? "comfortably above" : "below"} the ${n}-week average of ${reachSt.avg.toFixed(0)}`
-    + `${reachSt.top ? `, the ${ord(reachSt.rank)}-strongest week of the last ${n}` : ""}.`);
+    + `(${Number(last.avg_daily_engaged).toFixed(1)} a day) — ${wow}, and `
+    + `${reachSt.above ? "well above" : "below"} the ${n}-week average of ${fmt(Math.round(reachSt.avg))}`
+    + `${reachSt.top ? `, the ${ord(reachSt.rank)}-strongest of the last ${n}` : ""}.`);
 
   // 2. Content
   const startSt = standing(trend, "starts", last.starts);
   const vsAll = Number(last.completion_pct) - Number(tot.completion_pct);
   out.push(`<b>Content is at its strongest in ${n} weeks.</b> ${fmt(last.starts)} video starts — `
-    + `${startSt.rank === 1 ? `the highest of the last ${n} weeks` : `${ord(startSt.rank)}-highest of the last ${n} weeks`}, `
-    + `against an average of ${startSt.avg.toFixed(0)} — and ${Number(last.completion_pct).toFixed(1)}% of starts were `
-    + `watched to the end, ${Math.abs(vsAll).toFixed(1)} points ${vsAll >= 0 ? "above" : "below"} the all-time average `
-    + `of ${Number(tot.completion_pct).toFixed(1)}%.`);
+    + `${startSt.rank === 1 ? `the highest of the last ${n}` : `${ord(startSt.rank)}-highest of the last ${n}`}, `
+    + `against an average of ${fmt(Math.round(startSt.avg))} — and ${Number(last.completion_pct).toFixed(1)}% were `
+    + `watched to the end, ${Math.abs(vsAll).toFixed(1)} points ${vsAll >= 0 ? "above" : "below"} the all-time `
+    + `average of ${Number(tot.completion_pct).toFixed(1)}%.`);
 
   // 3. AI — the week-over-week drop is real but measured against the 12-week PEAK.
   //    Reach and depth diverge here, so say so rather than lead with "−46%".
@@ -333,15 +339,16 @@ function bottomLine(last, prior, tot, trend) {
   const perUserLast = Number(last.ai_users) > 0 ? Number(last.ai_messages) / Number(last.ai_users) : 0;
   const perUserAvg  = avgOf(trend.map(r => ({ v: Number(r.ai_users) > 0 ? Number(r.ai_messages) / Number(r.ai_users) : 0 })), "v");
 
-  out.push(`<b>More people used the AI guides than usual — but conversations ran shorter.</b> `
-    + `${fmt(last.ai_users)} people sent a message`
+  const aiUsersUp = Number(last.ai_users) >= Number(prior.ai_users);
+  out.push(`<b>AI messages came back to our normal range after an unusually high week.</b> `
+    + `Volume (${fmt(last.ai_messages)}) eased from ${fmt(prior.ai_messages)}`
+    + `${priorWasPeak ? `, the busiest AI week of the last ${n}` : ""}, and sits `
+    + `${msgSt.above ? "above" : "near"} the ${n}-week average of ${fmt(Math.round(msgSt.avg))}. `
+    + `Reach ${aiUsersUp ? "<b>grew</b>" : "held"} even so: ${fmt(last.ai_users)} people sent a message`
     + `${aiUserSt.top ? ` (${ord(aiUserSt.rank)}-highest in ${n} weeks)` : ""}, `
-    + `and ${Number(last.ai_adoption_pct).toFixed(1)}% adoption was ${adoptSt.above ? "above" : "below"} the `
-    + `${n}-week average of ${adoptSt.avg.toFixed(1)}%. Volume (${fmt(last.ai_messages)}) fell from `
-    + `${fmt(prior.ai_messages)}${priorWasPeak ? ` — the busiest AI week of the last ${n}` : ""}, so the drop `
-    + `measures against an exceptional week, not people walking away. Depth is the real signal: `
-    + `${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)} average. `
-    + `<b>Worth watching, not alarming.</b>`);
+    + `${aiUsersUp ? "up from" : "vs."} ${fmt(prior.ai_users)}, with ${Number(last.ai_adoption_pct).toFixed(1)}% adoption `
+    + `${adoptSt.above ? "above" : "below"} the ${adoptSt.avg.toFixed(1)}% average. Conversations ran shorter `
+    + `(${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)}) — <b>depth, not interest, is what to build on.</b>`);
   return out;
 }
 
@@ -451,6 +458,9 @@ async function load() {
         <div class="at-grid">
           <div><div class="at-val">${fmt(tot.registered_users)}</div><div class="at-label">Registered</div></div>
           <div><div class="at-val">${fmt(tot.engaged_users)}</div><div class="at-label">Ever engaged</div></div>
+          <div><div class="at-val">${Number(tot.avg_dau).toFixed(1)}</div><div class="at-label">Avg DAU</div></div>
+          <div><div class="at-val">${fmt(tot.peak_dau)}</div><div class="at-label">Peak DAU</div></div>
+          <div><div class="at-val">${fmt(tot.avg_mau)}</div><div class="at-label">Avg MAU</div></div>
           <div><div class="at-val">${fmt(tot.starts)}</div><div class="at-label">Video starts</div></div>
           <div><div class="at-val">${Number(tot.completion_pct).toFixed(1)}%</div><div class="at-label">Completion</div></div>
           <div><div class="at-val">${fmt(tot.ai_messages)}</div><div class="at-label">AI messages</div></div>
@@ -463,7 +473,10 @@ async function load() {
         ÷ videos started. AI adoption = engaged people who sent ≥ 1 AI message. Weeks run Monday–Sunday; only
         <b>complete</b> weeks are compared, so the current partial week is excluded.
         Each figure is shown against the <b>12-week average</b> as well as the prior week, because a single
-        week-over-week move can mislead when the week being compared against was unusually high or low.<br>
+        week-over-week move can mislead when the week being compared against was unusually high or low.
+        The platform report runs each morning covering the previous 24 hours, so figures always run
+        <b>through yesterday</b>; days are labelled by the day the activity happened.
+        DAU / MAU = distinct people engaged in a day / calendar month.<br>
         <b>Spiritual levels.</b> <b>P1 Investigator</b> — ${esc(P_DEFS.P1)}. <b>P2 Explorer</b> — ${esc(P_DEFS.P2)}.
         <b>P3 Achiever</b> — ${esc(P_DEFS.P3)}. <b>P4 Coach</b> — ${esc(P_DEFS.P4)}. <b>Not yet assessed</b> — ${esc(P_DEFS.Unknown)}.<br>
         Figures are aggregate only — no individual user data is shown. Source: BTTB.ai platform engagement warehouse,

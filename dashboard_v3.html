@@ -361,6 +361,32 @@ function kpi(label, val, d, ref) {
   </div>`;
 }
 
+/* Publish our rendered height to the parent frame so a Wix (or any) embed can
+   size its iframe to the content instead of guessing. Harmless when not embedded.
+   The page is ~1350px wide-layout and ~2100px stacked, so a fixed height cannot
+   serve both — this lets the embed follow the real value. */
+let _lastReportedH = 0;
+let _heightObserver = null;   // keep a reference: an unreferenced ResizeObserver can be GC'd
+function startHeightReporting() {
+  const measure = () => Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const send = (force) => {
+    const h = measure();
+    if (!force && h === _lastReportedH) return;   // only speak when it actually changes
+    _lastReportedH = h;
+    try { parent.postMessage({ bttbDashboard: "v3", height: h }, "*"); } catch (e) {}
+  };
+  send(true);
+  if (window.ResizeObserver) {
+    _heightObserver = new ResizeObserver(() => send());
+    _heightObserver.observe(document.body);
+  }
+  window.addEventListener("resize", () => send());
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => send());
+  // Belt and braces: poll for reflows the observer/resize event can miss (late fonts,
+  // re-wrapping, the host frame being resized). Posts only on a real change, so it's cheap.
+  setInterval(() => send(), 500);
+}
+
 async function load() {
   try {
     const [weeks, totalsArr, levels] = await Promise.all([
@@ -496,6 +522,7 @@ async function load() {
       el.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
     });
     document.body.setAttribute("data-ready", "1");
+    startHeightReporting();
   } catch (e) {
     document.getElementById("sheet").innerHTML = `<div class="err">Could not load summary: ${esc(e.message)}</div>`;
     document.body.setAttribute("data-ready", "error");

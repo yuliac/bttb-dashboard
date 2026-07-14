@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTTB.ai · Executive Engagement Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* BTTB brand */
+    --navy:   #171f3b;   /* ink / headers */
+    --orange: #d25e2a;   /* CONTENT series + accent rule */
+    --blue:   #007fd3;   /* AI series */
+    --ink:    #414141;   /* body text */
+    --muted:  #6b7280;
+    --line:   #e3e6ec;
+    --surface:#ffffff;
+    --panel:  #f7f8fa;
+    /* status (reserved — deltas only, always with glyph + sign) */
+    --pos:    #1f7a5c;
+    --neg:    #c0392b;
+    /* P-level sequential ramp: one hue, light -> dark (validated monotonic) */
+    --p1: #cfe4f5; --p2: #8ec4e8; --p3: #3d93d1; --p4: #0b5c94; --pUnknown: #bfbfbf;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--surface); }
+  body {
+    margin: 0; padding: 22px;
+    font-family: Arimo, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink); font-size: 13px; line-height: 1.45;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .sheet { max-width: 760px; margin: 0 auto; }
+  h1, h2, h3, .kpi-val, .hero-val { font-family: Poppins, Arimo, system-ui, sans-serif; }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 3px solid var(--orange); padding-bottom: 12px; margin-bottom: 16px; }
+  .brandline { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+               color: var(--orange); font-weight: 700; margin-bottom: 4px; }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; }
+  .window { font-size: 12.5px; color: var(--muted); }
+  .window strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- bottom line ---------- */
+  .bottomline { background: var(--panel); border-left: 3px solid var(--navy);
+                border-radius: 0 6px 6px 0; padding: 12px 16px; margin-bottom: 18px; }
+  .bottomline h2 { margin: 0 0 7px; font-size: 10.5px; letter-spacing: .12em;
+                   text-transform: uppercase; color: var(--navy); font-weight: 700; }
+  .bottomline ul { margin: 0; padding-left: 16px; }
+  .bottomline li { margin-bottom: 4px; }
+  .bottomline li:last-child { margin-bottom: 0; }
+  .bottomline b { color: var(--navy); font-weight: 700; }
+
+  /* ---------- section ---------- */
+  h2.sec { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+           color: var(--muted); font-weight: 700; margin: 0 0 8px; }
+
+  /* ---------- hero ---------- */
+  .hero { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+          border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; }
+  .hero-val { font-size: 40px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .hero-label { font-size: 13px; color: var(--ink); }
+  .hero-label b { color: var(--navy); }
+  .hero-sub { margin-left: auto; text-align: right; font-size: 11.5px; color: var(--muted); }
+
+  /* ---------- KPI split ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .col { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .col-head { padding: 8px 14px; font-family: Poppins, sans-serif; font-size: 11px; font-weight: 700;
+              letter-spacing: .1em; text-transform: uppercase; color: #fff; }
+  .col-head.content { background: var(--orange); }
+  .col-head.ai      { background: var(--blue); }
+  .col-body { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+               letter-spacing: .06em; margin-bottom: 2px; }
+  .kpi-val { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; }
+  .kpi-delta { font-size: 11.5px; font-weight: 600; margin-top: 1px; }
+  .kpi-ref { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); } .flat { color: var(--muted); }
+
+  /* ---------- charts ---------- */
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .panel { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .panel h3 { margin: 0 0 2px; font-size: 12.5px; font-weight: 600; color: var(--navy); }
+  .panel .cap { font-size: 10.5px; color: var(--muted); margin-bottom: 8px; }
+  .panel svg { display: block; width: 100%; height: auto; }
+  .plevels { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; }
+  .plevels h3 { margin: 0 0 2px; font-size: 12.5px; font-weight: 600; color: var(--navy); }
+  .plevels .cap { font-size: 10.5px; color: var(--muted); margin-bottom: 10px; }
+
+  /* ---------- all-time strip ---------- */
+  .alltime { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 14px; }
+  .at-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .at-val { font-family: Poppins, sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); }
+  .at-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+  footer { border-top: 1px solid var(--line); padding-top: 10px;
+           font-size: 10px; color: var(--muted); line-height: 1.5; }
+  footer b { color: var(--ink); }
+
+  /* ---------- tooltip ---------- */
+  #tip { position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
+         background: var(--navy); color: #fff; font-size: 11px; padding: 5px 9px;
+         border-radius: 4px; white-space: nowrap; z-index: 10; font-family: Arimo, sans-serif; }
+  .err { color: var(--neg); padding: 14px; }
+  .loading { color: var(--muted); padding: 30px; text-align: center; }
+
+  @media (max-width: 700px) {
+    body { padding: 12px; }
+    .split, .charts { grid-template-columns: 1fr; }
+    .at-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .hero-sub { margin-left: 0; text-align: left; width: 100%; }
+    .hero-val { font-size: 34px; }
+  }
+
+  /* ---------- print / PDF (US Letter, tuned to land on ONE page) ---------- */
+  @page { size: Letter portrait; margin: 0.4in; }
+  @media print {
+    body { padding: 0; font-size: 9.5px; line-height: 1.38; }
+    .sheet { max-width: none; }
+    #tip { display: none !important; }
+    .split, .charts { grid-template-columns: 1fr 1fr; }
+    /* never break a block, and never strand a heading at the foot of a page */
+    .panel, .col, .plevels, .hero, .bottomline, .alltime, footer {
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    h2.sec { break-after: avoid; page-break-after: avoid; margin-bottom: 5px; }
+    header { padding-bottom: 7px; margin-bottom: 9px; border-bottom-width: 2px; }
+    h1 { font-size: 16px; margin-bottom: 3px; }
+    .brandline { font-size: 9px; margin-bottom: 2px; }
+    .window { font-size: 9.5px; }
+    .bottomline { padding: 8px 11px; margin-bottom: 9px; }
+    .bottomline h2 { font-size: 8.5px; margin-bottom: 4px; }
+    .bottomline li { margin-bottom: 2px; }
+    .hero { padding: 8px 13px; margin-bottom: 9px; }
+    .hero-val { font-size: 27px; }
+    .hero-label { font-size: 10.5px; }
+    .hero-sub { font-size: 9px; }
+    .split, .charts { gap: 10px; margin-bottom: 9px; }
+    .col-head { padding: 5px 11px; font-size: 9px; }
+    .col-body { padding: 8px 11px; gap: 8px; }
+    .kpi-val { font-size: 15.5px; }
+    .kpi-label, .kpi-ref { font-size: 8.5px; }
+    .kpi-delta { font-size: 9px; }
+    .panel { padding: 8px 10px; }
+    .panel h3 { font-size: 10.5px; }
+    .panel .cap { font-size: 8.5px; margin-bottom: 5px; }
+    .plevels { padding: 8px 12px; margin-bottom: 9px; }
+    .plevels h3 { font-size: 10.5px; }
+    .plevels .cap { font-size: 8.5px; margin-bottom: 6px; }
+    .alltime { padding-top: 8px; margin-bottom: 8px; }
+    .at-val { font-size: 13.5px; }
+    .at-label { font-size: 8px; }
+    footer { font-size: 7.5px; line-height: 1.4; padding-top: 7px; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet">
+  <div class="loading" id="loading">Loading engagement summary…</div>
+</div>
+<div id="tip"></div>
+
+<script>
+const URL_ = "https://kddfedrklpavwjjdenor.supabase.co";
+const KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
+
+const C = { orange: "#d25e2a", blue: "#007fd3", navy: "#171f3b", muted: "#6b7280", line: "#e3e6ec" };
+const P_RAMP = { P1: "#cfe4f5", P2: "#8ec4e8", P3: "#3d93d1", P4: "#0b5c94", Unknown: "#bfbfbf" };
+/* Official BTTB spiritual-level names + how each is derived from the signup survey. */
+const P_NAMES = { P1: "Investigator", P2: "Explorer", P3: "Achiever", P4: "Coach", Unknown: "Not yet assessed" };
+const P_DEFS  = {
+  P1: "searching — not yet saved by grace",
+  P2: "saved by grace · in the Bible 0–3 days a week",
+  P3: "saved · in the Bible 4–7 days a week · disciples rarely",
+  P4: "saved · in the Bible 4–7 days a week · disciples daily or weekly",
+  Unknown: "has not completed the survey",
+};
+const TREND_WEEKS = 12;
+
+const fmt  = n => Number(n).toLocaleString();
+const esc  = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const mdy  = d => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const mdyy = d => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+async function api(path, q = "") {
+  const r = await fetch(`${URL_}/rest/v1/${path}?${q}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`${path}: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+/* delta vs prior week. pp=true for metrics already in percent. */
+function delta(cur, prev, pp = false) {
+  cur = Number(cur); prev = Number(prev);
+  if (!isFinite(cur) || !isFinite(prev) || (!pp && prev === 0)) return { text: "—", cls: "flat" };
+  const d = pp ? (cur - prev) : (100 * (cur - prev) / prev);
+  const dead = pp ? 0.5 : 2;                       // treat tiny moves as flat
+  const cls = d > dead ? "pos" : d < -dead ? "neg" : "flat";
+  const arrow = d > dead ? "▲" : d < -dead ? "▼" : "▬";
+  const val = pp ? `${Math.abs(d).toFixed(1)} pp` : `${Math.abs(d).toFixed(1)}%`;
+  const sign = d > 0 ? "+" : d < 0 ? "−" : "";
+  return { text: `${arrow} ${sign}${val}`, cls, num: d };
+}
+
+/* ---------- SVG bar panel: one series, 12 weeks, focus week highlighted ---------- */
+function barPanel(rows, key, color, fmtVal) {
+  const W = 340, H = 132, padL = 4, padR = 4, padT = 16, padB = 20;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const max = Math.max(...rows.map(r => Number(r[key])), 1);
+  const slot = plotW / rows.length;
+  const bw = Math.max(4, slot - 3);                 // 3px surface gap between bars
+  const bars = rows.map((r, i) => {
+    const v = Number(r[key]);
+    const h = Math.max(1.5, (v / max) * plotH);
+    const x = padL + i * slot + (slot - bw) / 2;
+    const y = padT + plotH - h;
+    const last = i === rows.length - 1;
+    const rad = Math.min(4, bw / 2, h);             // 4px rounded data-end at the top
+    const d = `M${x},${padT + plotH} L${x},${y + rad} Q${x},${y} ${x + rad},${y} `
+            + `L${x + bw - rad},${y} Q${x + bw},${y} ${x + bw},${y + rad} L${x + bw},${padT + plotH} Z`;
+    return `<path d="${d}" fill="${color}" fill-opacity="${last ? 1 : 0.28}"
+             data-tip="${esc(mdy(r.week_start))}–${esc(mdy(r.week_end))}: ${esc(fmtVal(v))}"/>`;
+  }).join("");
+  const lastRow = rows[rows.length - 1];
+  const lastV = Number(lastRow[key]);
+  const lastH = Math.max(1.5, (lastV / max) * plotH);
+  const lastX = padL + (rows.length - 1) * slot + slot / 2;
+  const labelY = padT + plotH - lastH - 5;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">
+    <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="${C.line}" stroke-width="1"/>
+    ${bars}
+    <text x="${lastX}" y="${labelY}" text-anchor="middle" font-size="11" font-weight="700"
+          font-family="Poppins,sans-serif" fill="${C.navy}">${esc(fmtVal(lastV))}</text>
+    <text x="${padL}" y="${H - 6}" font-size="9" fill="${C.muted}" font-family="Arimo,sans-serif">${esc(mdy(rows[0].week_start))}</text>
+    <text x="${W - padR}" y="${H - 6}" text-anchor="end" font-size="9" fill="${C.muted}" font-family="Arimo,sans-serif">last wk</text>
+  </svg>`;
+}
+
+/* ---------- SVG P-level bars: sequential ramp + direct labels (contrast relief) ---------- */
+function pLevelChart(levels) {
+  const order = ["P1", "P2", "P3", "P4", "Unknown"];
+  const rows = order.map(p => levels.find(l => l.p_level === p)).filter(Boolean);
+  const total = rows.reduce((s, r) => s + Number(r.users), 0);
+  const W = 720, rowH = 26, gap = 6, padL = 92, padR = 116;
+  const H = rows.length * (rowH + gap);
+  const max = Math.max(...rows.map(r => Number(r.users)), 1);
+  const plotW = W - padL - padR;
+  const bars = rows.map((r, i) => {
+    const v = Number(r.users);
+    const w = Math.max(2, (v / max) * plotW);
+    const y = i * (rowH + gap);
+    const rad = Math.min(4, w / 2);
+    const d = `M${padL},${y} L${padL + w - rad},${y} Q${padL + w},${y} ${padL + w},${y + rad} `
+            + `L${padL + w},${y + rowH - rad} Q${padL + w},${y + rowH} ${padL + w - rad},${y + rowH} L${padL},${y + rowH} Z`;
+    const pctv = total ? (100 * v / total).toFixed(0) : 0;
+    // white ink only on the darkest step (P4); navy clears 4.5:1 on every lighter step
+    const inkOnBar = r.p_level === "P4" ? "#ffffff" : C.navy;
+    return `<g data-tip="${esc(P_NAMES[r.p_level])} — ${esc(P_DEFS[r.p_level])} · ${fmt(v)} users (${pctv}%)">
+      <text x="${padL - 10}" y="${y + rowH / 2 + 4}" text-anchor="end" font-size="11" font-weight="600"
+            font-family="Arimo,sans-serif" fill="${C.navy}">${esc(r.p_level)}</text>
+      <path d="${d}" fill="${P_RAMP[r.p_level]}"/>
+      <text x="${padL + w + 9}" y="${y + rowH / 2 + 4}" font-size="11" font-weight="600"
+            font-family="Poppins,sans-serif" fill="${C.navy}">${fmt(v)}
+        <tspan font-family="Arimo,sans-serif" font-weight="400" fill="${C.muted}"> · ${pctv}%</tspan>
+      </text>
+      <text x="${padL + 9}" y="${y + rowH / 2 + 4}" font-size="10" font-family="Arimo,sans-serif"
+            fill="${inkOnBar}">${esc(P_NAMES[r.p_level])}</text>
+    </g>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${bars}</svg>`;
+}
+
+/* ---------- narrative ---------- */
+function bottomLine(last, prior, tot) {
+  const out = [];
+  const reach = delta(last.engaged_users, prior.engaged_users);
+  const reachWord = reach.cls === "pos" ? "up" : reach.cls === "neg" ? "down" : "held steady";
+  out.push(`<b>${fmt(last.engaged_users)} people engaged</b> with the platform last week `
+    + `(${Number(last.avg_daily_engaged).toFixed(1)} per day) — ${reachWord === "held steady"
+        ? "essentially flat vs. the week before" : `${reachWord} ${reach.text.replace(/[▲▼▬]\s*/, "")} vs. the week before`}.`);
+
+  const sD = delta(last.starts, prior.starts);
+  const cD = delta(last.completion_pct, prior.completion_pct, true);
+  const vsAll = Number(last.completion_pct) - Number(tot.completion_pct);
+  out.push(`<b>Content engagement is strong.</b> ${fmt(last.starts)} video starts `
+    + `(${sD.cls === "pos" ? "up" : sD.cls === "neg" ? "down" : "flat"}${sD.cls !== "flat" ? " " + sD.text.replace(/[▲▼▬]\s*/, "") : ""}), `
+    + `and ${Number(last.completion_pct).toFixed(1)}% of starts were watched to the end — `
+    + `${Math.abs(vsAll).toFixed(1)} points ${vsAll >= 0 ? "above" : "below"} the all-time average of ${Number(tot.completion_pct).toFixed(1)}%.`);
+
+  const aD = delta(last.ai_messages, prior.ai_messages);
+  const adoptGap = Number(last.ai_adoption_pct) - Number(tot.ai_adoption_pct);
+  const aiFalling = aD.cls === "neg";
+  out.push(`<b>AI engagement is the area to watch.</b> ${fmt(last.ai_messages)} AI messages `
+    + `(${aiFalling ? "down" : aD.cls === "pos" ? "up" : "flat"}${aD.cls !== "flat" ? " " + aD.text.replace(/[▲▼▬]\s*/, "") : ""} vs. the week before), `
+    + `and ${Number(last.ai_adoption_pct).toFixed(1)}% of engaged users sent at least one message — `
+    + `${Math.abs(adoptGap).toFixed(1)} points ${adoptGap >= 0 ? "above" : "below"} the all-time rate of ${Number(tot.ai_adoption_pct).toFixed(1)}%.`);
+  return out;
+}
+
+function kpi(label, val, d, ref) {
+  return `<div>
+    <div class="kpi-label">${esc(label)}</div>
+    <div class="kpi-val">${val}</div>
+    <div class="kpi-delta ${d.cls}">${d.text}</div>
+    <div class="kpi-ref">${esc(ref)}</div>
+  </div>`;
+}
+
+async function load() {
+  try {
+    const [weeks, totalsArr, levels] = await Promise.all([
+      api("rpc/get_weekly_engagement", "order=week_start.asc"),
+      api("rpc/get_engagement_totals", ""),
+      api("vw_user_levels", "order=p_level.asc"),
+    ]);
+    const tot = Array.isArray(totalsArr) ? totalsArr[0] : totalsArr;
+    const complete = weeks.filter(w => w.is_complete);
+    if (complete.length < 2) throw new Error("Need at least two complete weeks of data.");
+
+    const last  = complete[complete.length - 1];
+    const prior = complete[complete.length - 2];
+    const trend = complete.slice(-TREND_WEEKS);
+
+    const dReach   = delta(last.engaged_users, prior.engaged_users);
+    const dStarts  = delta(last.starts, prior.starts);
+    const dCompl   = delta(last.completion_pct, prior.completion_pct, true);
+    const dAiMsg   = delta(last.ai_messages, prior.ai_messages);
+    const dAiAdopt = delta(last.ai_adoption_pct, prior.ai_adoption_pct, true);
+
+    document.getElementById("sheet").innerHTML = `
+      <header>
+        <div class="brandline">Back to the Bible · bttb.ai</div>
+        <h1>Platform Engagement — Executive Summary</h1>
+        <div class="window">
+          Week of <strong>${mdyy(last.week_start)} – ${mdyy(last.week_end)}</strong>
+          &nbsp;·&nbsp; compared with <strong>${mdy(prior.week_start)} – ${mdy(prior.week_end)}</strong>
+          &nbsp;·&nbsp; data through ${mdyy(tot.last_day)}
+        </div>
+      </header>
+
+      <div class="bottomline">
+        <h2>Bottom line</h2>
+        <ul>${bottomLine(last, prior, tot).map(b => `<li>${b}</li>`).join("")}</ul>
+      </div>
+
+      <h2 class="sec">Platform engagement — content and AI together</h2>
+      <div class="hero">
+        <div class="hero-val">${fmt(last.engaged_users)}</div>
+        <div class="hero-label">
+          <b>people engaged last week</b><br>
+          <span style="color:var(--muted)">used content, the AI guides, or both</span>
+        </div>
+        <div class="hero-sub">
+          <span class="${dReach.cls}" style="font-weight:600">${dReach.text}</span> vs. prior week
+          (${fmt(prior.engaged_users)})<br>
+          ${Number(last.avg_daily_engaged).toFixed(1)} average per day
+        </div>
+      </div>
+
+      <h2 class="sec">Engagement broken out</h2>
+      <div class="split">
+        <div class="col">
+          <div class="col-head content">Content</div>
+          <div class="col-body">
+            ${kpi("Video starts", fmt(last.starts), dStarts, `${fmt(prior.starts)} prior week`)}
+            ${kpi("Completion rate", Number(last.completion_pct).toFixed(1) + "%", dCompl, `${Number(tot.completion_pct).toFixed(1)}% all-time`)}
+          </div>
+        </div>
+        <div class="col">
+          <div class="col-head ai">AI guides</div>
+          <div class="col-body">
+            ${kpi("AI messages", fmt(last.ai_messages), dAiMsg, `${fmt(prior.ai_messages)} prior week`)}
+            ${kpi("AI adoption", Number(last.ai_adoption_pct).toFixed(1) + "%", dAiAdopt, `${Number(tot.ai_adoption_pct).toFixed(1)}% all-time`)}
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sec">Trend — last ${trend.length} complete weeks</h2>
+      <div class="charts">
+        <div class="panel">
+          <h3>Content — video starts per week</h3>
+          <div class="cap">Last week highlighted</div>
+          ${barPanel(trend, "starts", C.orange, v => fmt(v))}
+        </div>
+        <div class="panel">
+          <h3>AI — messages per week</h3>
+          <div class="cap">Last week highlighted</div>
+          ${barPanel(trend, "ai_messages", C.blue, v => fmt(v))}
+        </div>
+      </div>
+
+      <h2 class="sec">Audience — spiritual growth levels</h2>
+      <div class="plevels">
+        <h3>Where our people are on the journey</h3>
+        <div class="cap">All ${fmt(tot.registered_users)} registered users · spiritual level is derived from each person’s signup survey</div>
+        ${pLevelChart(levels)}
+      </div>
+
+      <div class="alltime">
+        <h2 class="sec">All-time picture — since ${mdyy(tot.first_day)}</h2>
+        <div class="at-grid">
+          <div><div class="at-val">${fmt(tot.registered_users)}</div><div class="at-label">Registered</div></div>
+          <div><div class="at-val">${fmt(tot.engaged_users)}</div><div class="at-label">Ever engaged</div></div>
+          <div><div class="at-val">${fmt(tot.starts)}</div><div class="at-label">Video starts</div></div>
+          <div><div class="at-val">${Number(tot.completion_pct).toFixed(1)}%</div><div class="at-label">Completion</div></div>
+          <div><div class="at-val">${fmt(tot.ai_messages)}</div><div class="at-label">AI messages</div></div>
+        </div>
+      </div>
+
+      <footer>
+        <b>How to read this.</b> “Engaged” = a person who started at least one video <i>or</i> sent at least one AI message.
+        “Content” counts video activity; “AI” counts messages to the AI guides. Completion rate = videos watched to the end
+        ÷ videos started. AI adoption = engaged people who sent ≥ 1 AI message. Weeks run Monday–Sunday; only
+        <b>complete</b> weeks are compared, so the current partial week is excluded.<br>
+        <b>Spiritual levels.</b> <b>P1 Investigator</b> — ${esc(P_DEFS.P1)}. <b>P2 Explorer</b> — ${esc(P_DEFS.P2)}.
+        <b>P3 Achiever</b> — ${esc(P_DEFS.P3)}. <b>P4 Coach</b> — ${esc(P_DEFS.P4)}. <b>Not yet assessed</b> — ${esc(P_DEFS.Unknown)}.<br>
+        Figures are aggregate only — no individual user data is shown. Source: BTTB.ai platform engagement warehouse,
+        refreshed daily.
+      </footer>`;
+
+    // hover tooltips (per-mark, bar/dot)
+    const tip = document.getElementById("tip");
+    document.querySelectorAll("[data-tip]").forEach(el => {
+      el.style.cursor = "default";
+      el.addEventListener("mousemove", e => {
+        tip.textContent = el.getAttribute("data-tip");
+        tip.style.opacity = 1;
+        tip.style.left = Math.min(e.clientX + 12, window.innerWidth - tip.offsetWidth - 8) + "px";
+        tip.style.top  = (e.clientY - 30) + "px";
+      });
+      el.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
+    });
+    document.body.setAttribute("data-ready", "1");
+  } catch (e) {
+    document.getElementById("sheet").innerHTML = `<div class="err">Could not load summary: ${esc(e.message)}</div>`;
+    document.body.setAttribute("data-ready", "error");
+    console.error(e);
+  }
+}
+load();
+</script>
+</body>
+</html>

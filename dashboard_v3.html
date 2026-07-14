@@ -368,7 +368,10 @@ function kpi(label, val, d, ref) {
 let _lastReportedH = 0;
 let _heightObserver = null;   // keep a reference: an unreferenced ResizeObserver can be GC'd
 function startHeightReporting() {
-  const measure = () => Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  // Measure the BODY, not documentElement: documentElement.scrollHeight is never
+  // smaller than the viewport, so in a too-tall iframe it reports the frame's own
+  // height and the embed can only ever ratchet upward.
+  const measure = () => Math.ceil(document.body.getBoundingClientRect().height);
   const send = (force) => {
     const h = measure();
     if (!force && h === _lastReportedH) return;   // only speak when it actually changes

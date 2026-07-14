@@ -57,13 +57,17 @@
   h2.sec { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
            color: var(--muted); font-weight: 700; margin: 0 0 8px; }
 
-  /* ---------- hero ---------- */
-  .hero { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
-          border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; }
-  .hero-val { font-size: 40px; font-weight: 700; color: var(--navy); line-height: 1; }
-  .hero-label { font-size: 13px; color: var(--ink); }
-  .hero-label b { color: var(--navy); }
-  .hero-sub { margin-left: auto; text-align: right; font-size: 11.5px; color: var(--muted); }
+  /* ---------- hero: WAU + DAU for the analysed week ---------- */
+  .hero { border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .hero-val { font-size: 38px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .hero-k { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+            color: var(--navy); margin-top: 5px; }
+  .hero-k span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }
+  .hero-d { font-size: 11.5px; font-weight: 600; margin-top: 3px; }
+  .hero-r { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .hero-note { border-top: 1px solid var(--line); margin-top: 11px; padding-top: 8px;
+               font-size: 11px; color: var(--muted); }
 
   /* ---------- KPI split ---------- */
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
@@ -110,13 +114,13 @@
   @media (max-width: 700px) {
     body { padding: 12px; }
     .split, .charts { grid-template-columns: 1fr; }
+    .hero-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .at-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .hero-sub { margin-left: 0; text-align: left; width: 100%; }
-    .hero-val { font-size: 34px; }
+    .hero-val { font-size: 30px; }
   }
 
   /* ---------- print / PDF (US Letter, tuned to land on ONE page) ---------- */
-  @page { size: Letter portrait; margin: 0.4in; }
+  @page { size: Letter portrait; margin: 0.34in; }
   @media print {
     body { padding: 0; font-size: 9.5px; line-height: 1.38; }
     .sheet { max-width: none; }
@@ -134,11 +138,14 @@
     .bottomline { padding: 8px 11px; margin-bottom: 9px; }
     .bottomline h2 { font-size: 8.5px; margin-bottom: 4px; }
     .bottomline li { margin-bottom: 2px; }
-    .hero { padding: 8px 13px; margin-bottom: 9px; }
-    .hero-val { font-size: 27px; }
-    .hero-label { font-size: 10.5px; }
-    .hero-sub { font-size: 9px; }
-    .split, .charts { gap: 10px; margin-bottom: 9px; }
+    .hero { padding: 7px 12px; margin-bottom: 8px; }
+    .hero-grid { gap: 14px; }
+    .hero-val { font-size: 24px; }
+    .hero-k { font-size: 9px; margin-top: 3px; }
+    .hero-d { font-size: 9px; }
+    .hero-r { font-size: 8.5px; }
+    .hero-note { font-size: 8.5px; margin-top: 7px; padding-top: 5px; }
+    .split, .charts { gap: 9px; margin-bottom: 8px; }
     .col-head { padding: 5px 11px; font-size: 9px; }
     .col-body { padding: 8px 11px; gap: 8px; }
     .kpi-val { font-size: 15.5px; }
@@ -147,14 +154,14 @@
     .panel { padding: 8px 10px; }
     .panel h3 { font-size: 10.5px; }
     .panel .cap { font-size: 8.5px; margin-bottom: 5px; }
-    .plevels { padding: 8px 12px; margin-bottom: 9px; }
+    .plevels { padding: 7px 11px; margin-bottom: 8px; }
     .plevels h3 { font-size: 10.5px; }
     .plevels .cap { font-size: 8.5px; margin-bottom: 6px; }
     .alltime { padding-top: 8px; margin-bottom: 8px; }
     .at-grid { gap: 6px; }
     .at-val { font-size: 12.5px; }
     .at-label { font-size: 7px; letter-spacing: .02em; }
-    footer { font-size: 7.5px; line-height: 1.4; padding-top: 7px; }
+    footer { font-size: 7px; line-height: 1.35; padding-top: 6px; }
   }
 </style>
 </head>
@@ -406,6 +413,7 @@ async function load() {
     const trend = complete.slice(-TREND_WEEKS);
 
     const dReach   = delta(last.engaged_users, prior.engaged_users);
+    const dDau     = delta(last.avg_daily_engaged, prior.avg_daily_engaged);
     const dStarts  = delta(last.starts, prior.starts);
     const dCompl   = delta(last.completion_pct, prior.completion_pct, true);
     const dAiUsers = delta(last.ai_users, prior.ai_users);
@@ -429,17 +437,19 @@ async function load() {
 
       <h2 class="sec">Platform engagement — content and AI together</h2>
       <div class="hero">
-        <div class="hero-val">${fmt(last.engaged_users)}</div>
-        <div class="hero-label">
-          <b>people engaged last week</b><br>
-          <span style="color:var(--muted)">used content, the AI guides, or both</span>
-        </div>
-        <div class="hero-sub">
-          <span class="${dReach.cls}" style="font-weight:600">${dReach.text}</span> vs. prior week
-          (${fmt(prior.engaged_users)})<br>
-          ${Number(last.avg_daily_engaged).toFixed(1)} average per day &nbsp;·&nbsp;
-          <span style="color:var(--pos);font-weight:600">${avgOf(trend, "engaged_users").toFixed(0)}</span>
-          ${trend.length}-week average
+        <div class="hero-grid">
+          <div>
+            <div class="hero-val">${fmt(last.engaged_users)}</div>
+            <div class="hero-k">WAU <span>— weekly active people</span></div>
+            <div class="hero-d ${dReach.cls}">${dReach.text} vs. prior week (${fmt(prior.engaged_users)})</div>
+            <div class="hero-r">${fmt(Math.round(avgOf(trend, "engaged_users")))} avg · ${trend.length} wks</div>
+          </div>
+          <div>
+            <div class="hero-val">${Number(last.avg_daily_engaged).toFixed(1)}</div>
+            <div class="hero-k">DAU <span>— average people per day</span></div>
+            <div class="hero-d ${dDau.cls}">${dDau.text} vs. prior week (${Number(prior.avg_daily_engaged).toFixed(1)})</div>
+            <div class="hero-r">${avgOf(trend, "avg_daily_engaged").toFixed(1)} avg · ${trend.length} wks</div>
+          </div>
         </div>
       </div>
 
@@ -505,7 +515,8 @@ async function load() {
         week-over-week move can mislead when the week being compared against was unusually high or low.
         The platform report runs each morning covering the previous 24 hours, so figures always run
         <b>through yesterday</b>; days are labelled by the day the activity happened.
-        DAU / MAU = distinct people engaged in a day / calendar month.<br>
+        <b>WAU</b> = distinct people engaged across the week (each person counted once);
+        <b>DAU</b> = the average of each day’s distinct people; <b>MAU</b> = distinct people in a calendar month.<br>
         <b>Spiritual levels.</b> <b>P1 Investigator</b> — ${esc(P_DEFS.P1)}. <b>P2 Explorer</b> — ${esc(P_DEFS.P2)}.
         <b>P3 Achiever</b> — ${esc(P_DEFS.P3)}. <b>P4 Coach</b> — ${esc(P_DEFS.P4)}. <b>Not yet assessed</b> — ${esc(P_DEFS.Unknown)}.<br>
         Figures are aggregate only — no individual user data is shown. Source: BTTB.ai platform engagement warehouse,

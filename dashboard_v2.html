@@ -149,13 +149,13 @@
 <body>
 
 <header>
-  <h1>BTTB.ai · Engagement Dashboard <span style="font-size:14px;font-weight:500;color:var(--muted);margin-left:6px;">v.2 — Jun 22 milestone view</span></h1>
+  <h1>BTTB.ai · Engagement Dashboard <span style="font-size:14px;font-weight:500;color:var(--muted);margin-left:6px;">v.2 — Jul 15 milestone view</span></h1>
   <div class="controls">
     <label for="from">From</label><input type="date" id="from" />
     <label for="to">To</label><input type="date" id="to" />
     <select id="preset">
       <option value="all">All time</option>
-      <option value="since622">Since Jun 22</option>
+      <option value="since715">Since Jul 15</option>
       <option value="30">Last 30 days</option>
       <option value="14">Last 14 days</option>
       <option value="7">Last 7 days</option>
@@ -181,14 +181,14 @@
   <div class="card"><h3>Messages per AI user per day</h3><div id="chart-ai-depth" class="chart"></div></div>
 </div>
 
-<h2>BTTB.ai promotion launch — before vs after June 22</h2>
-<p class="note">June 22, 2026 marks the start of active promotion of bttb.ai. Use this section to measure growth driven by that push.</p>
+<h2>BTTB.ai promotion launch — before vs after July 15</h2>
+<p class="note">July 15, 2026 marks the start of active promotion of bttb.ai. Use this section to measure growth driven by that push.</p>
 <div id="promo-compare"></div>
 <div class="grid" style="margin-top: 14px;">
-  <div class="card"><h3>Daily active users — Jun 22 milestone</h3><div id="chart-dau-promo" class="chart"></div></div>
-  <div class="card"><h3>New signups — Jun 22 milestone</h3><div id="chart-signups-promo" class="chart"></div></div>
-  <div class="card"><h3>AI messages — Jun 22 milestone</h3><div id="chart-ai-promo" class="chart"></div></div>
-  <div class="card"><h3>Video starts — Jun 22 milestone</h3><div id="chart-videos-promo" class="chart"></div></div>
+  <div class="card"><h3>Daily active users — Jul 15 milestone</h3><div id="chart-dau-promo" class="chart"></div></div>
+  <div class="card"><h3>New signups — Jul 15 milestone</h3><div id="chart-signups-promo" class="chart"></div></div>
+  <div class="card"><h3>AI messages — Jul 15 milestone</h3><div id="chart-ai-promo" class="chart"></div></div>
+  <div class="card"><h3>Video starts — Jul 15 milestone</h3><div id="chart-videos-promo" class="chart"></div></div>
 </div>
 
 <h2>Playlist change impact — before vs after March 30</h2>
@@ -261,7 +261,7 @@ const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 
 const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
 const BRAND = "#2563eb", ACCENT = "#10b981", WARN = "#dc2626", MUTED = "#9ca3af";
-const PROMO_COLOR = "#e91e8c"; // magenta pink for Jun 22 line
+const PROMO_COLOR = "#e91e8c"; // magenta pink for Jul 15 line
 const fmt = n => Number(n).toLocaleString();
 const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
 
@@ -358,12 +358,16 @@ async function load() {
   const sq = [];
   if (fromVal) sq.push(`signup_day=gte.${fromVal}`);
   if (toVal)   sq.push(`signup_day=lte.${toVal}`);
+  // Top-videos table honors the date window via an RPC; empty bound = all-time.
+  const vq = [];
+  if (fromVal) vq.push(`p_from=${fromVal}`);
+  if (toVal)   vq.push(`p_to=${toVal}`);
 
   try {
     const [daily, signups, videos, levels, progDaily, depth, programs, plDepth, daytype] = await Promise.all([
       api("vw_daily_engagement", `${dq.join("&")}&order=day.asc&limit=10000`),
       api("vw_daily_signups",    `${sq.join("&")}&order=signup_day.asc&limit=10000`),
-      api("vw_video_engagement", "order=starts.desc&limit=200"),
+      api("rpc/get_video_engagement", `${vq.join("&")}&order=starts.desc&limit=200`),
       api("vw_user_levels",      "order=p_level.asc&limit=20"),
       api("vw_daily_program_engagement", `${dq.join("&")}&order=day.asc&limit=50000`),
       api("vw_daily_content_depth", `${dq.join("&")}&order=day.asc&limit=10000`),
@@ -403,7 +407,7 @@ async function load() {
     meta.textContent =
       `${daily[0].day} → ${daily[daily.length-1].day} · ${daily.length} days`;
 
-    const PIVOT_PROMO = "2026-06-22";
+    const PIVOT_PROMO = "2026-07-15";
     const PIVOT = "2026-03-30";
 
     // DAU
@@ -414,7 +418,7 @@ async function load() {
       hovertemplate: "%{x|%b %d}<br>%{y} active users<extra></extra>",
     }], layout(mp([
       { date: PIVOT, label: "Mar 30 playlist", color: WARN },
-      { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
+      { date: PIVOT_PROMO, label: "Jul 15 promo", color: PROMO_COLOR },
     ])), config);
 
     // Video sessions
@@ -427,7 +431,7 @@ async function load() {
                 legend: { orientation: "h", y: 1.1, x: 0 },
                 ...mp([
                   { date: PIVOT, label: "Mar 30", color: WARN },
-                  { date: PIVOT_PROMO, label: "Jun 22", color: PROMO_COLOR },
+                  { date: PIVOT_PROMO, label: "Jul 15", color: PROMO_COLOR },
                 ]) }), config);
 
     // Funnel
@@ -463,7 +467,7 @@ async function load() {
       hovertemplate: "%{x|%b %d}<br>%{y} messages<extra></extra>",
     }], layout(mp([
       { date: PIVOT, label: "Mar 30", color: WARN },
-      { date: PIVOT_PROMO, label: "Jun 22", color: PROMO_COLOR },
+      { date: PIVOT_PROMO, label: "Jul 15", color: PROMO_COLOR },
     ])), config);
 
     // === AI ENGAGEMENT ===
@@ -487,7 +491,7 @@ async function load() {
                 tickfont: { color: "#dc2626", size: mFontSz }, title: isMobile ? "" : "% of DAU",
                 titlefont: { color: "#dc2626" }, automargin: true },
       ...mp([
-        { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
+        { date: PIVOT_PROMO, label: "Jul 15 promo", color: PROMO_COLOR },
       ]),
     }), config);
 
@@ -528,10 +532,10 @@ async function load() {
         <div class="compare-card">
           <h4>Avg daily active users</h4>
           <div class="era-row">
-            <div><div class="era-label">Before Jun 22</div>
+            <div><div class="era-label">Before Jul 15</div>
               <div class="era-value">${bpDAU}</div>
               <div class="meta">${beforePromo.length} days</div></div>
-            <div><div class="era-label">After Jun 22</div>
+            <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apDAU}</div>
               <div class="meta">${afterPromo.length} days</div></div>
           </div>
@@ -540,9 +544,9 @@ async function load() {
         <div class="compare-card">
           <h4>Avg daily signups</h4>
           <div class="era-row">
-            <div><div class="era-label">Before Jun 22</div>
+            <div><div class="era-label">Before Jul 15</div>
               <div class="era-value">${bpSU}</div></div>
-            <div><div class="era-label">After Jun 22</div>
+            <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apSU}</div></div>
           </div>
           ${deltaPct(apSU, bpSU)}
@@ -550,9 +554,9 @@ async function load() {
         <div class="compare-card">
           <h4>Avg daily AI messages</h4>
           <div class="era-row">
-            <div><div class="era-label">Before Jun 22</div>
+            <div><div class="era-label">Before Jul 15</div>
               <div class="era-value">${bpAI}</div></div>
-            <div><div class="era-label">After Jun 22</div>
+            <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apAI}</div></div>
           </div>
           ${deltaPct(apAI, bpAI)}
@@ -560,17 +564,17 @@ async function load() {
         <div class="compare-card">
           <h4>Avg daily video starts</h4>
           <div class="era-row">
-            <div><div class="era-label">Before Jun 22</div>
+            <div><div class="era-label">Before Jul 15</div>
               <div class="era-value">${bpStarts}</div></div>
-            <div><div class="era-label">After Jun 22</div>
+            <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apStarts}</div></div>
           </div>
           ${deltaPct(apStarts, bpStarts)}
         </div>
       </div>`;
 
-    // Promo milestone charts (all-time data with Jun 22 line)
-    const promoLine = mp([{ date: PIVOT_PROMO, label: "Jun 22 promo launch", color: PROMO_COLOR }]);
+    // Promo milestone charts (all-time data with Jul 15 line)
+    const promoLine = mp([{ date: PIVOT_PROMO, label: "Jul 15 promo launch", color: PROMO_COLOR }]);
 
     Plotly.newPlot("chart-dau-promo", [{
       x: daily.map(r => r.day), y: daily.map(r => r.active_users),
@@ -663,7 +667,7 @@ async function load() {
     // Videos per user trend
     const bothPivots = mp([
       { date: PIVOT, label: "Mar 30 playlist", color: WARN },
-      { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
+      { date: PIVOT_PROMO, label: "Jul 15 promo", color: PROMO_COLOR },
     ]);
 
     Plotly.newPlot("chart-depth", [{
@@ -883,7 +887,7 @@ async function load() {
       type: "bar", marker: { color: ACCENT },
       hovertemplate: "%{x|%b %d}<br>%{y} signups<extra></extra>",
     }], layout(mp([
-      { date: PIVOT_PROMO, label: "Jun 22 promo", color: PROMO_COLOR },
+      { date: PIVOT_PROMO, label: "Jul 15 promo", color: PROMO_COLOR },
     ])), config);
 
     // Levels
@@ -943,8 +947,8 @@ document.getElementById("preset").addEventListener("change", e => {
   if (v === "all") {
     document.getElementById("from").value = "";
     document.getElementById("to").value = "";
-  } else if (v === "since622") {
-    document.getElementById("from").value = "2026-06-22";
+  } else if (v === "since715") {
+    document.getElementById("from").value = "2026-07-15";
     document.getElementById("to").value = "";
   } else {
     const today = new Date();

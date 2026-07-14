@@ -323,12 +323,16 @@ async function load() {
   const sq = [];
   if (fromVal) sq.push(`signup_day=gte.${fromVal}`);
   if (toVal)   sq.push(`signup_day=lte.${toVal}`);
+  // Top-videos table honors the date window via an RPC; empty bound = all-time.
+  const vq = [];
+  if (fromVal) vq.push(`p_from=${fromVal}`);
+  if (toVal)   vq.push(`p_to=${toVal}`);
 
   try {
     const [daily, signups, videos, levels, progDaily, depth, programs, plDepth, daytype] = await Promise.all([
       api("vw_daily_engagement", `${dq.join("&")}&order=day.asc&limit=10000`),
       api("vw_daily_signups",    `${sq.join("&")}&order=signup_day.asc&limit=10000`),
-      api("vw_video_engagement", "order=starts.desc&limit=200"),
+      api("rpc/get_video_engagement", `${vq.join("&")}&order=starts.desc&limit=200`),
       api("vw_user_levels",      "order=p_level.asc&limit=20"),
       api("vw_daily_program_engagement", `${dq.join("&")}&order=day.asc&limit=50000`),
       api("vw_daily_content_depth", `${dq.join("&")}&order=day.asc&limit=10000`),

@@ -505,7 +505,10 @@ async function load() {
       yaxis: { title: "Messages per AI user", automargin: true },
     }), config);
 
-    const deltaPct = (a, b) => {
+    // hasData=false → the period being measured has no days yet (e.g. the milestone
+    // is today/tomorrow). Show that plainly instead of a bogus -100%.
+    const deltaPct = (a, b, hasData = true) => {
+      if (!hasData) return `<span class="delta" style="color:var(--muted)">awaiting data</span>`;
       const d = b > 0 ? Math.round(100 * (a - b) / b) : 0;
       return d >= 0 ? `<span class="delta up">+${d}%</span>` : `<span class="delta down">${d}%</span>`;
     };
@@ -519,13 +522,15 @@ async function load() {
     const promoAvg = (arr, key) => arr.length ? arr.reduce((s, r) => s + Number(r[key] || 0), 0) / arr.length : 0;
 
     const bpDAU   = promoAvg(beforePromo, "active_users").toFixed(1);
-    const apDAU   = promoAvg(afterPromo,  "active_users").toFixed(1);
+    const apHas   = afterPromo.length > 0;
+    const apSUHas = afterPromoSU.length > 0;
+    const apDAU   = apHas ? promoAvg(afterPromo,  "active_users").toFixed(1) : "—";
     const bpAI    = promoAvg(beforePromo, "ai_messages").toFixed(1);
-    const apAI    = promoAvg(afterPromo,  "ai_messages").toFixed(1);
+    const apAI    = apHas ? promoAvg(afterPromo,  "ai_messages").toFixed(1) : "—";
     const bpStarts = promoAvg(beforePromo, "video_starts").toFixed(1);
-    const apStarts = promoAvg(afterPromo,  "video_starts").toFixed(1);
+    const apStarts = apHas ? promoAvg(afterPromo,  "video_starts").toFixed(1) : "—";
     const bpSU    = (beforePromoSU.reduce((s,r)=>s+r.signups,0) / Math.max(beforePromoSU.length,1)).toFixed(1);
-    const apSU    = (afterPromoSU.reduce((s,r)=>s+r.signups,0)  / Math.max(afterPromoSU.length,1)).toFixed(1);
+    const apSU    = apSUHas ? (afterPromoSU.reduce((s,r)=>s+r.signups,0)  / Math.max(afterPromoSU.length,1)).toFixed(1) : "—";
 
     document.getElementById("promo-compare").innerHTML = `
       <div class="compare-grid">
@@ -539,7 +544,7 @@ async function load() {
               <div class="era-value" style="color:var(--accent)">${apDAU}</div>
               <div class="meta">${afterPromo.length} days</div></div>
           </div>
-          ${deltaPct(apDAU, bpDAU)}
+          ${deltaPct(apDAU, bpDAU, apHas)}
         </div>
         <div class="compare-card">
           <h4>Avg daily signups</h4>
@@ -549,7 +554,7 @@ async function load() {
             <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apSU}</div></div>
           </div>
-          ${deltaPct(apSU, bpSU)}
+          ${deltaPct(apSU, bpSU, apSUHas)}
         </div>
         <div class="compare-card">
           <h4>Avg daily AI messages</h4>
@@ -559,7 +564,7 @@ async function load() {
             <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apAI}</div></div>
           </div>
-          ${deltaPct(apAI, bpAI)}
+          ${deltaPct(apAI, bpAI, apHas)}
         </div>
         <div class="compare-card">
           <h4>Avg daily video starts</h4>
@@ -569,7 +574,7 @@ async function load() {
             <div><div class="era-label">After Jul 15</div>
               <div class="era-value" style="color:var(--accent)">${apStarts}</div></div>
           </div>
-          ${deltaPct(apStarts, bpStarts)}
+          ${deltaPct(apStarts, bpStarts, apHas)}
         </div>
       </div>`;
 

@@ -348,7 +348,7 @@ function bottomLine(last, prior, tot, trend) {
     + `${aiUserSt.top ? ` (${ord(aiUserSt.rank)}-highest in ${n} weeks)` : ""}, `
     + `${aiUsersUp ? "up from" : "vs."} ${fmt(prior.ai_users)}, with ${Number(last.ai_adoption_pct).toFixed(1)}% adoption `
     + `${adoptSt.above ? "above" : "below"} the ${adoptSt.avg.toFixed(1)}% average. Conversations ran shorter `
-    + `(${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)}) — <b>depth, not interest, is what to build on.</b>`);
+    + `(${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)}).`);
   return out;
 }
 

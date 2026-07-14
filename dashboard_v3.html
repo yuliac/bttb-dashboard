@@ -29,7 +29,7 @@
   body {
     margin: 0; padding: 22px;
     font-family: Arimo, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    color: var(--ink); font-size: 13px; line-height: 1.45;
+    color: var(--ink); font-size: 15px; line-height: 1.45;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .sheet { max-width: 760px; margin: 0 auto; }
@@ -37,16 +37,16 @@
 
   /* ---------- header ---------- */
   header { border-bottom: 3px solid var(--orange); padding-bottom: 12px; margin-bottom: 16px; }
-  .brandline { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  .brandline { font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
                color: var(--orange); font-weight: 700; margin-bottom: 4px; }
-  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; }
-  .window { font-size: 12.5px; color: var(--muted); }
+  h1 { margin: 0 0 6px; font-size: 24px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; }
+  .window { font-size: 14.5px; color: var(--muted); }
   .window strong { color: var(--ink); font-weight: 600; }
 
   /* ---------- bottom line ---------- */
   .bottomline { background: var(--panel); border-left: 3px solid var(--navy);
                 border-radius: 0 6px 6px 0; padding: 12px 16px; margin-bottom: 18px; }
-  .bottomline h2 { margin: 0 0 7px; font-size: 10.5px; letter-spacing: .12em;
+  .bottomline h2 { margin: 0 0 7px; font-size: 12.5px; letter-spacing: .12em;
                    text-transform: uppercase; color: var(--navy); font-weight: 700; }
   .bottomline ul { margin: 0; padding-left: 16px; }
   .bottomline li { margin-bottom: 4px; }
@@ -54,59 +54,59 @@
   .bottomline b { color: var(--navy); font-weight: 700; }
 
   /* ---------- section ---------- */
-  h2.sec { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  h2.sec { font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase;
            color: var(--muted); font-weight: 700; margin: 0 0 8px; }
 
   /* ---------- hero: WAU + DAU for the analysed week ---------- */
   .hero { border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; }
   .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .hero-val { font-size: 38px; font-weight: 700; color: var(--navy); line-height: 1; }
-  .hero-k { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  .hero-val { font-size: 32px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .hero-k { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
             color: var(--navy); margin-top: 5px; }
   .hero-k span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }
-  .hero-d { font-size: 11.5px; font-weight: 600; margin-top: 3px; }
-  .hero-r { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .hero-d { font-size: 13.5px; font-weight: 600; margin-top: 3px; }
+  .hero-r { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
   .hero-note { border-top: 1px solid var(--line); margin-top: 11px; padding-top: 8px;
-               font-size: 11px; color: var(--muted); }
+               font-size: 13px; color: var(--muted); }
 
   /* ---------- KPI split ---------- */
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
   .col { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .col-head { padding: 8px 14px; font-family: Poppins, sans-serif; font-size: 11px; font-weight: 700;
+  .col-head { padding: 8px 14px; font-family: Poppins, sans-serif; font-size: 13px; font-weight: 700;
               letter-spacing: .1em; text-transform: uppercase; color: #fff; }
   .col-head.content { background: var(--orange); }
   .col-head.ai      { background: var(--blue); }
   .col-body { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .kpi-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+  .kpi-label { font-size: 12.5px; color: var(--muted); text-transform: uppercase;
                letter-spacing: .06em; margin-bottom: 2px; }
-  .kpi-val { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; }
-  .kpi-delta { font-size: 11.5px; font-weight: 600; margin-top: 1px; }
-  .kpi-ref { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .kpi-val { font-size: 24px; font-weight: 700; color: var(--navy); line-height: 1.1; }
+  .kpi-delta { font-size: 13.5px; font-weight: 600; margin-top: 1px; }
+  .kpi-ref { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
   .pos { color: var(--pos); } .neg { color: var(--neg); } .flat { color: var(--muted); }
 
   /* ---------- charts ---------- */
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
   .panel { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
-  .panel h3 { margin: 0 0 2px; font-size: 12.5px; font-weight: 600; color: var(--navy); }
-  .panel .cap { font-size: 10.5px; color: var(--muted); margin-bottom: 8px; }
+  .panel h3 { margin: 0 0 2px; font-size: 14.5px; font-weight: 600; color: var(--navy); }
+  .panel .cap { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
   .panel svg { display: block; width: 100%; height: auto; }
   .plevels { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; }
-  .plevels h3 { margin: 0 0 2px; font-size: 12.5px; font-weight: 600; color: var(--navy); }
-  .plevels .cap { font-size: 10.5px; color: var(--muted); margin-bottom: 10px; }
+  .plevels h3 { margin: 0 0 2px; font-size: 14.5px; font-weight: 600; color: var(--navy); }
+  .plevels .cap { font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
 
   /* ---------- all-time strip ---------- */
   .alltime { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 14px; }
   .at-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-  .at-val { font-family: Poppins, sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); }
-  .at-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .at-val { font-family: Poppins, sans-serif; font-size: 19px; font-weight: 700; color: var(--navy); }
+  .at-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .01em; }
 
   footer { border-top: 1px solid var(--line); padding-top: 10px;
-           font-size: 10px; color: var(--muted); line-height: 1.5; }
+           font-size: 12px; color: var(--muted); line-height: 1.5; }
   footer b { color: var(--ink); }
 
   /* ---------- tooltip ---------- */
   #tip { position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
-         background: var(--navy); color: #fff; font-size: 11px; padding: 5px 9px;
+         background: var(--navy); color: #fff; font-size: 13px; padding: 5px 9px;
          border-radius: 4px; white-space: nowrap; z-index: 10; font-family: Arimo, sans-serif; }
   .err { color: var(--neg); padding: 14px; }
   .loading { color: var(--muted); padding: 30px; text-align: center; }
@@ -116,7 +116,7 @@
     .split, .charts { grid-template-columns: 1fr; }
     .hero-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .at-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .hero-val { font-size: 30px; }
+    .hero-val { font-size: 26px; }
   }
 
   /* ---------- print / PDF (US Letter, tuned to land on ONE page) ---------- */
@@ -130,7 +130,7 @@
     .panel, .col, .plevels, .hero, .bottomline, .alltime, footer {
       break-inside: avoid; page-break-inside: avoid;
     }
-    h2.sec { break-after: avoid; page-break-after: avoid; margin-bottom: 5px; }
+    h2.sec { break-after: avoid; page-break-after: avoid; margin-bottom: 5px; font-size: 10.5px; }
     header { padding-bottom: 7px; margin-bottom: 9px; border-bottom-width: 2px; }
     h1 { font-size: 16px; margin-bottom: 3px; }
     .brandline { font-size: 9px; margin-bottom: 2px; }
@@ -230,7 +230,7 @@ function delta(cur, prev, pp = false) {
 
 /* ---------- SVG bar panel: one series, 12 weeks, focus week highlighted ---------- */
 function barPanel(rows, key, color, fmtVal) {
-  const W = 340, H = 108, padL = 4, padR = 4, padT = 14, padB = 18;
+  const W = 340, H = 112, padL = 4, padR = 4, padT = 18, padB = 18;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const max = Math.max(...rows.map(r => Number(r[key])), 1);
   const slot = plotW / rows.length;
@@ -261,14 +261,14 @@ function barPanel(rows, key, color, fmtVal) {
     if (m === prevMonth) return "";
     prevMonth = m;
     const x = padL + i * slot + slot / 2;
-    return `<text x="${x}" y="${H - 6}" text-anchor="middle" font-size="9" fill="${C.muted}"
+    return `<text x="${x}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${C.muted}"
              font-family="Arimo,sans-serif">${d.toLocaleDateString("en-US", { month: "short" })}</text>`;
   }).join("");
 
   return `<svg viewBox="0 0 ${W} ${H}" role="img">
     <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="${C.line}" stroke-width="1"/>
     ${bars}
-    <text x="${lastX}" y="${labelY}" text-anchor="middle" font-size="11" font-weight="700"
+    <text x="${lastX}" y="${labelY}" text-anchor="middle" font-size="13" font-weight="700"
           font-family="Poppins,sans-serif" fill="${C.navy}">${esc(fmtVal(lastV))}</text>
     ${monthTicks}
   </svg>`;
@@ -294,14 +294,14 @@ function pLevelChart(levels) {
     // white ink only on the darkest step (P4); navy clears 4.5:1 on every lighter step
     const inkOnBar = r.p_level === "P4" ? "#ffffff" : C.navy;
     return `<g data-tip="${esc(P_NAMES[r.p_level])} — ${esc(P_DEFS[r.p_level])} · ${fmt(v)} users (${pctv}%)">
-      <text x="${padL - 10}" y="${y + rowH / 2 + 4}" text-anchor="end" font-size="11" font-weight="600"
+      <text x="${padL - 10}" y="${y + rowH / 2 + 4}" text-anchor="end" font-size="13" font-weight="600"
             font-family="Arimo,sans-serif" fill="${C.navy}">${esc(r.p_level)}</text>
       <path d="${d}" fill="${P_RAMP[r.p_level]}"/>
-      <text x="${padL + w + 9}" y="${y + rowH / 2 + 4}" font-size="11" font-weight="600"
+      <text x="${padL + w + 9}" y="${y + rowH / 2 + 4}" font-size="13" font-weight="600"
             font-family="Poppins,sans-serif" fill="${C.navy}">${fmt(v)}
         <tspan font-family="Arimo,sans-serif" font-weight="400" fill="${C.muted}"> · ${pctv}%</tspan>
       </text>
-      <text x="${padL + 9}" y="${y + rowH / 2 + 4}" font-size="10" font-family="Arimo,sans-serif"
+      <text x="${padL + 9}" y="${y + rowH / 2 + 4}" font-size="12" font-family="Arimo,sans-serif"
             fill="${inkOnBar}">${esc(P_NAMES[r.p_level])}</text>
     </g>`;
   }).join("");
@@ -496,13 +496,13 @@ async function load() {
         <h2 class="sec">All-time picture — since ${mdyy(tot.first_day)}</h2>
         <div class="at-grid">
           <div><div class="at-val">${fmt(tot.registered_users)}</div><div class="at-label">Registered</div></div>
-          <div><div class="at-val">${fmt(tot.engaged_users)}</div><div class="at-label">Ever engaged</div></div>
+          <div><div class="at-val">${fmt(tot.engaged_users)}</div><div class="at-label">Engaged</div></div>
           <div><div class="at-val">${Number(tot.avg_dau).toFixed(1)}</div><div class="at-label">Avg DAU</div></div>
           <div><div class="at-val">${fmt(tot.peak_dau)}</div><div class="at-label">Peak DAU</div></div>
           <div><div class="at-val">${fmt(tot.avg_mau)}</div><div class="at-label">Avg MAU</div></div>
-          <div><div class="at-val">${fmt(tot.starts)}</div><div class="at-label">Video starts</div></div>
+          <div><div class="at-val">${fmt(tot.starts)}</div><div class="at-label">Starts</div></div>
           <div><div class="at-val">${Number(tot.completion_pct).toFixed(1)}%</div><div class="at-label">Completion</div></div>
-          <div><div class="at-val">${fmt(tot.ai_messages)}</div><div class="at-label">AI messages</div></div>
+          <div><div class="at-val">${fmt(tot.ai_messages)}</div><div class="at-label">AI msgs</div></div>
         </div>
       </div>
 

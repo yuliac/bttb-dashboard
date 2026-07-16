@@ -180,6 +180,33 @@
   <div class="card"><h3>Messages per AI user per day</h3><div id="chart-ai-depth" class="chart"></div></div>
 </div>
 
+<section id="topic-section" style="display:none">
+<h2>What people ask the AI for</h2>
+<p id="topic-sub" style="font-size:12px;color:var(--muted);font-style:italic;margin:0 0 12px;"></p>
+<div id="topic-body">
+  <div class="grid">
+    <div class="card"><h3>Our dimensions — what asks map to</h3><div id="chart-topic-dims" class="chart" style="height: 360px;"></div></div>
+    <div class="card"><h3>In their own words</h3><div id="chart-topic-lay" class="chart" style="height: 360px;"></div></div>
+    <div class="card" style="grid-column: 1 / -1;"><h3>Dimensions that arrive together</h3><div id="topic-combos"></div></div>
+  </div>
+  <p id="topic-note" style="font-size:12px;color:var(--muted);margin-top:8px;"></p>
+</div>
+<p id="topic-thin" style="display:none;color:var(--muted);font-size:13px;padding:14px 2px;"></p>
+</section>
+
+<h2 id="email">Email reminders</h2>
+<p id="email-sub" style="font-size:12px;color:var(--muted);font-style:italic;margin:0 0 12px;">Loading…</p>
+<div class="kpis" id="email-kpis"></div>
+<div class="grid">
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Daily delivered, opens &amp; clicks</h3>
+    <div id="chart-email-trend" class="chart" style="height: 340px;"></div>
+  </div>
+  <div class="card"><h3>Open, click &amp; click-to-open rate</h3><div id="chart-email-rates" class="chart"></div></div>
+  <div class="card"><h3>Weekday vs weekend</h3><div id="table-email-daytype"></div></div>
+</div>
+<p id="email-note" style="font-size:12px;color:var(--muted);margin-top:8px;"></p>
+
 <h2>Playlist change impact — before vs after March 30</h2>
 <div id="era-compare"></div>
 <div class="grid" style="margin-top: 14px;">
@@ -252,6 +279,7 @@ const KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 
 const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
 const BRAND = "#2563eb", ACCENT = "#10b981", WARN = "#dc2626", MUTED = "#9ca3af";
+const PROMO_COLOR = "#e91e8c", PIVOT_PROMO = "2026-07-15"; // Jul 15 workout-change benchmark (6 videos → 2)
 const fmt = n => Number(n).toLocaleString();
 const pct = (a, b) => b > 0 ? Math.round(1000 * a / b) / 10 : 0;
 
@@ -301,12 +329,12 @@ const layout = (extra = {}) => ({
 });
 const config = { displayModeBar: false, responsive: true };
 
-function pivotLine(pivotDate, label) {
+function pivotLine(pivotDate, label, color = WARN) {
   return {
     shapes: [{ type: "line", x0: pivotDate, x1: pivotDate, y0: 0, y1: 1, yref: "paper",
-               line: { color: WARN, width: 2, dash: "dash" } }],
+               line: { color, width: 2, dash: "dash" } }],
     annotations: [{ x: pivotDate, y: 1.05, yref: "paper", text: label,
-                    showarrow: false, font: { size: 11, color: WARN },
+                    showarrow: false, font: { size: 11, color },
                     yanchor: "bottom", xanchor: "left" }],
   };
 }
@@ -327,6 +355,9 @@ async function load() {
   const vq = [];
   if (fromVal) vq.push(`p_from=${fromVal}`);
   if (toVal)   vq.push(`p_to=${toVal}`);
+
+  loadTopics(fromVal, toVal); // topic section honors the same date window
+  loadEmail(fromVal, toVal);  // email-reminder section honors the same date window
 
   try {
     const [daily, signups, videos, levels, progDaily, depth, programs, plDepth, daytype] = await Promise.all([
@@ -373,7 +404,7 @@ async function load() {
       type: "scatter", mode: "lines", fill: "tozeroy",
       line: { color: BRAND, width: 2.4 }, fillcolor: "rgba(37,99,235,0.12)",
       hovertemplate: "%{x|%b %d}<br>%{y} active users<extra></extra>",
-    }], layout(), config);
+    }], layout(pivotLine(PIVOT_PROMO, "Jul 15", PROMO_COLOR)), config);
 
     // Video sessions
     Plotly.newPlot("chart-videos", [
@@ -382,7 +413,8 @@ async function load() {
       { x: daily.map(r => r.day), y: daily.map(r => r.video_completes),
         type: "bar", name: "Completed", marker: { color: ACCENT } },
     ], layout({ barmode: "overlay", showlegend: true,
-                legend: { orientation: "h", y: 1.1, x: 0 } }), config);
+                legend: { orientation: "h", y: 1.1, x: 0.35 },
+                ...pivotLine(PIVOT_PROMO, "Jul 15", PROMO_COLOR) }), config);
 
     // Funnel
     const fStarts = daily.reduce((s,r)=>s+r.video_starts, 0);
@@ -415,7 +447,7 @@ async function load() {
       x: daily.map(r => r.day), y: daily.map(r => r.ai_messages),
       type: "bar", marker: { color: "#8b5cf6" },
       hovertemplate: "%{x|%b %d}<br>%{y} messages<extra></extra>",
-    }], layout(), config);
+    }], layout(pivotLine(PIVOT_PROMO, "Jul 15", PROMO_COLOR)), config);
 
     // === AI ENGAGEMENT ===
     const aiUsers = daily.map(r => r.users_with_ai_msgs || 0);
@@ -431,12 +463,13 @@ async function load() {
         line: { color: "#dc2626", width: 2.5 }, marker: { size: 5 },
         hovertemplate: "%{x|%b %d}<br>%{y:.1f}% of active users<extra></extra>" },
     ], layout({
-      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0, font: { size: isMobile ? 10 : 12 } },
+      showlegend: true, legend: { orientation: "h", y: 1.12, x: 0.3, font: { size: isMobile ? 10 : 12 } },
       margin: { l: 45, r: isMobile ? 45 : 60, t: 40, b: 50 },
       yaxis: { title: isMobile ? "" : "AI users", automargin: true, tickfont: { size: mFontSz } },
       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%",
                 tickfont: { color: "#dc2626", size: mFontSz }, title: isMobile ? "" : "% of DAU",
                 titlefont: { color: "#dc2626" }, automargin: true },
+      ...pivotLine(PIVOT_PROMO, "Jul 15", PROMO_COLOR),
     }), config);
 
     Plotly.newPlot("chart-ai-depth", [{
@@ -838,6 +871,156 @@ document.getElementById("preset").addEventListener("change", e => {
   }
   load();
 });
+
+const TOPIC_FLOOR = 15; // fewer asks than this in-window → show "widen the range"
+
+async function loadTopics(fromVal, toVal) {
+  const sec = document.getElementById("topic-section");
+  const body = document.getElementById("topic-body");
+  const thin = document.getElementById("topic-thin");
+  const dp = [];
+  if (fromVal) dp.push(`p_from=${fromVal}`);
+  if (toVal)   dp.push(`p_to=${toVal}`);
+  const tq = extra => [...dp, extra].filter(Boolean).join("&");
+  const rangeLabel = (fromVal || toVal)
+    ? `${fromVal || "start"} → ${toVal || "latest"}`
+    : "All time";
+  try {
+    const [summary, dims, lay, combos] = await Promise.all([
+      api("rpc/get_ai_topic_summary",    dp.join("&")),
+      api("rpc/get_ai_dimension_demand", tq("order=asks.desc&limit=100")),
+      api("rpc/get_ai_lay_term_demand",  tq("order=asks.desc&limit=100")),
+      api("rpc/get_ai_dimension_combos", tq("order=asks.desc&limit=8")),
+    ]);
+    const totalAsks = (summary[0] || {}).asks || 0;
+    sec.style.display = "";
+    document.getElementById("topic-sub").textContent =
+      `${rangeLabel} · excludes internal testing (BTTB, bttb.org, developer). One ask = one person raising one topic on one day; bars show asks, hover shows people.`;
+
+    if (totalAsks < TOPIC_FLOOR) {
+      body.style.display = "none";
+      thin.style.display = "";
+      thin.textContent = `Only ${totalAsks} AI ${totalAsks === 1 ? "ask" : "asks"} in this window — too few to break down by topic. Widen the date range (30 days or more) for a reliable picture.`;
+      return;
+    }
+    body.style.display = "";
+    thin.style.display = "none";
+
+    const btn = dims.find(d => d.is_button);
+    const dimRows = dims.filter(d => !d.is_button).slice(0, 12).reverse();
+    const barText = r => `${r.asks} asks · ${r.people} ${r.people === 1 ? "person" : "people"}`;
+    const barColor = r => r.people >= 3 ? BRAND : MUTED;
+
+    const hbar = (id, rows, xtitle) => Plotly.newPlot(id, [{
+      type: "bar", orientation: "h",
+      y: rows.map(r => r.label), x: rows.map(r => r.asks),
+      text: rows.map(barText), textposition: "outside", cliponaxis: false,
+      marker: { color: rows.map(barColor) },
+      customdata: rows.map(r => r.people),
+      hovertemplate: "%{y}<br>%{x} asks · %{customdata} people<extra></extra>",
+    }], layout({
+      margin: { l: 135, r: 130, t: 10, b: 34 },
+      xaxis: { title: xtitle, gridcolor: "#f3f4f6", tickangle: 0, automargin: true,
+               tickfont: { color: "#6b7280", size: mFontSz } },
+      yaxis: { automargin: true, tickfont: { color: "#111", size: 12 } },
+    }), config);
+
+    hbar("chart-topic-dims", dimRows.map(d => ({ ...d, label: d.dimension })), "Asks (dimension mentions)");
+    hbar("chart-topic-lay",  lay.slice(0, 12).reverse().map(l => ({ ...l, label: l.lay_term })), "Asks (their words)");
+
+    document.getElementById("topic-combos").innerHTML =
+      `<table><thead><tr><th>Combination</th><th class="num">Asks</th><th class="num">People</th></tr></thead>
+       <tbody>${combos.map(c =>
+         `<tr><td>${c.combination}</td><td class="num">${c.asks}</td><td class="num">${c.people}</td></tr>`).join("")}</tbody></table>`;
+
+    document.getElementById("topic-note").innerHTML =
+      (btn ? `&ldquo;Growing spiritually&rdquo; (${btn.asks} asks) is a one-click button in the interface, live since Apr 27 2026 &mdash; a single click, not a typed struggle, so it is shown separately from the dimensions above. ` : "") +
+      `Grey bars = fewer than 3 people (directional only). An ask can touch several dimensions, so they do not sum to the ask total.`;
+  } catch (e) { console.warn("topics failed:", e); }
+}
+
+async function loadEmail(fromVal, toVal) {
+  const sub = document.getElementById("email-sub");
+  const dq = [];
+  if (fromVal) dq.push(`day=gte.${fromVal}`);
+  if (toVal)   dq.push(`day=lte.${toVal}`);
+  const rangeLabel = (fromVal || toVal)
+    ? `${fromVal || "start"} → ${toVal || "latest"}` : "All time";
+  try {
+    const daily = await api("vw_email_reminder_daily", `${dq.join("&")}&order=day.asc&limit=10000`);
+    if (!daily.length) {
+      sub.textContent = "No reminder-email sends in this window.";
+      document.getElementById("email-kpis").innerHTML = "";
+      ["chart-email-trend", "chart-email-rates"].forEach(id => Plotly.purge(id));
+      document.getElementById("table-email-daytype").innerHTML = "";
+      return;
+    }
+    const sum = k => daily.reduce((s, r) => s + Number(r[k] || 0), 0);
+    const sends = sum("sends"), delivered = sum("delivered"), suppressed = sum("suppressed"),
+          bounces = sum("bounces"), uopens = sum("unique_opens"),
+          uclicks = sum("unique_clicks");
+
+    sub.textContent = `${rangeLabel} · the daily "start your workout" reminder. `
+      + `One row = one email sent; rates are vs delivered. Extra in-email links (past results, survey) count toward clicks — not yet split out.`;
+
+    const kpis = [
+      { label: "Sends",        value: fmt(sends),               sub: `${daily.length} send-days` },
+      { label: "Delivered",    value: fmt(delivered),           sub: `${fmt(suppressed)} suppressed · ${fmt(bounces)} bounced` },
+      { label: "Open rate",    value: pct(uopens, delivered) + "%",  sub: `${fmt(uopens)} opened` },
+      { label: "Click rate",   value: pct(uclicks, delivered) + "%", sub: `${fmt(uclicks)} clicked` },
+      { label: "Click-to-open", value: pct(uclicks, uopens) + "%",   sub: "of openers clicked" },
+    ];
+    document.getElementById("email-kpis").innerHTML = kpis.map(k =>
+      `<div class="kpi"><div class="label">${k.label}</div>
+         <div class="value">${k.value}</div>
+         <div class="sub">${k.sub}</div></div>`).join("");
+
+    const days = daily.map(r => r.day);
+    Plotly.newPlot("chart-email-trend", [
+      { type: "bar", name: "Delivered", x: days, y: daily.map(r => r.delivered),
+        marker: { color: "#c7d2fe" } },
+      { type: "scatter", mode: "lines+markers", name: "Unique opens", x: days,
+        y: daily.map(r => r.unique_opens), line: { color: BRAND, width: 2 }, marker: { size: 4 } },
+      { type: "scatter", mode: "lines+markers", name: "Unique clicks", x: days,
+        y: daily.map(r => r.unique_clicks), line: { color: ACCENT, width: 2 }, marker: { size: 4 } },
+    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.15, x: 0 } }), config);
+
+    Plotly.newPlot("chart-email-rates", [
+      { type: "scatter", mode: "lines", name: "Open rate", x: days,
+        y: daily.map(r => r.open_rate), line: { color: BRAND, width: 2 } },
+      { type: "scatter", mode: "lines", name: "Click rate", x: days,
+        y: daily.map(r => r.click_rate), line: { color: ACCENT, width: 2 } },
+      { type: "scatter", mode: "lines", name: "Click-to-open", x: days,
+        y: daily.map(r => r.ctor), line: { color: WARN, width: 2, dash: "dot" } },
+    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.15, x: 0 },
+                yaxis: { ticksuffix: "%", gridcolor: "#f3f4f6",
+                         tickfont: { color: "#6b7280", size: mFontSz }, automargin: true } }), config);
+
+    const grp = wk => {
+      const rows = daily.filter(r => r.is_weekend === wk);
+      const g = k => rows.reduce((s, r) => s + Number(r[k] || 0), 0);
+      const d = g("delivered"), o = g("unique_opens"), c = g("unique_clicks");
+      return { sends: g("sends"), delivered: d, opens: o, clicks: c,
+               open: pct(o, d), click: pct(c, d), ctor: pct(o ? c : 0, o) };
+    };
+    const wd = grp(false), we = grp(true);
+    const row = (name, x) => `<tr><td>${name}</td>
+      <td class="num">${fmt(x.sends)}</td><td class="num">${fmt(x.delivered)}</td>
+      <td class="num">${x.open}%</td><td class="num">${x.click}%</td><td class="num">${x.ctor}%</td></tr>`;
+    document.getElementById("table-email-daytype").innerHTML =
+      `<table class="wkd-table"><thead><tr><th>Day type</th><th class="num">Sends</th>
+        <th class="num">Delivered</th><th class="num">Open</th><th class="num">Click</th>
+        <th class="num">C2O</th></tr></thead><tbody>
+        ${we.sends ? row("Weekend", we) : ""}${wd.sends ? row("Weekday", wd) : ""}</tbody></table>`;
+
+    document.getElementById("email-note").innerHTML =
+      `&ldquo;Suppressed&rdquo; = address on the spam-complaint list, so the send was skipped (not delivered). `
+      + `Open tracking undercounts on clients that block pixels, so treat open rate as a floor.`;
+  } catch (e) {
+    console.warn("email section failed:", e);
+    sub.innerHTML = '<span class="err">Email-reminder data failed to load.</span>';
+  }
+}
 
 load();
 </script>

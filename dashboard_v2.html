@@ -195,6 +195,18 @@
 <p id="topic-thin" style="display:none;color:var(--muted);font-size:13px;padding:14px 2px;"></p>
 </section>
 
+<h2 id="email">Email reminders</h2>
+<p id="email-sub" style="font-size:12px;color:var(--muted);font-style:italic;margin:0 0 12px;">Loading…</p>
+<div class="kpis" id="email-kpis"></div>
+<div class="grid">
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Open, click &amp; click-to-open rate over time</h3>
+    <div id="chart-email-rates" class="chart" style="height: 340px;"></div>
+  </div>
+  <div class="card" style="grid-column: 1 / -1;"><h3>Weekday vs weekend</h3><div id="table-email-daytype"></div></div>
+</div>
+<p id="email-note" style="font-size:12px;color:var(--muted);margin-top:8px;"></p>
+
 <h2>Workout length change — before vs after July 15</h2>
 <p class="note">On July 15, 2026 the workout was shortened from 6 videos to 2. Use this section to measure the impact of that change.</p>
 <div id="promo-compare"></div>
@@ -378,6 +390,7 @@ async function load() {
   if (toVal)   vq.push(`p_to=${toVal}`);
 
   loadTopics(fromVal, toVal); // topic section honors the same date window
+  loadEmail(fromVal, toVal);  // email-reminder section honors the same date window
 
   try {
     const [daily, signups, videos, levels, progDaily, depth, programs, plDepth, daytype] = await Promise.all([
@@ -1045,6 +1058,81 @@ async function loadTopics(fromVal, toVal) {
       (btn ? `&ldquo;Growing spiritually&rdquo; (${btn.asks} asks) is a one-click button in the interface, live since Apr 27 2026 &mdash; a single click, not a typed struggle, so it is shown separately from the dimensions above. ` : "") +
       `Grey bars = fewer than 3 people (directional only). An ask can touch several dimensions, so they do not sum to the ask total.`;
   } catch (e) { console.warn("topics failed:", e); }
+}
+
+async function loadEmail(fromVal, toVal) {
+  const sub = document.getElementById("email-sub");
+  const dq = [];
+  if (fromVal) dq.push(`day=gte.${fromVal}`);
+  if (toVal)   dq.push(`day=lte.${toVal}`);
+  const rangeLabel = (fromVal || toVal)
+    ? `${fromVal || "start"} → ${toVal || "latest"}` : "All time";
+  try {
+    const daily = await api("vw_email_reminder_daily", `${dq.join("&")}&order=day.asc&limit=10000`);
+    if (!daily.length) {
+      sub.textContent = "No reminder-email sends in this window.";
+      document.getElementById("email-kpis").innerHTML = "";
+      Plotly.purge("chart-email-rates");
+      document.getElementById("table-email-daytype").innerHTML = "";
+      return;
+    }
+    const sum = k => daily.reduce((s, r) => s + Number(r[k] || 0), 0);
+    const sends = sum("sends"), delivered = sum("delivered"), suppressed = sum("suppressed"),
+          bounces = sum("bounces"), uopens = sum("unique_opens"),
+          uclicks = sum("unique_clicks");
+
+    sub.textContent = `${rangeLabel} · the daily "start your workout" reminder. `
+      + `One row = one email sent; rates are vs delivered. Extra in-email links (past results, survey) count toward clicks — not yet split out.`;
+
+    const kpis = [
+      { label: "Sends",        value: fmt(sends),               sub: `${daily.length} send-days` },
+      { label: "Delivered",    value: fmt(delivered),           sub: `${fmt(suppressed)} suppressed · ${fmt(bounces)} bounced` },
+      { label: "Open rate",    value: pct(uopens, delivered) + "%",  sub: `${fmt(uopens)} opened` },
+      { label: "Click rate",   value: pct(uclicks, delivered) + "%", sub: `${fmt(uclicks)} clicked` },
+      { label: "Click-to-open", value: pct(uclicks, uopens) + "%",   sub: "of openers clicked" },
+    ];
+    document.getElementById("email-kpis").innerHTML = kpis.map(k =>
+      `<div class="kpi"><div class="label">${k.label}</div>
+         <div class="value">${k.value}</div>
+         <div class="sub">${k.sub}</div></div>`).join("");
+
+    const days = daily.map(r => r.day);
+    Plotly.newPlot("chart-email-rates", [
+      { type: "scatter", mode: "lines", name: "Open rate", x: days,
+        y: daily.map(r => r.open_rate), line: { color: BRAND, width: 2 } },
+      { type: "scatter", mode: "lines", name: "Click rate", x: days,
+        y: daily.map(r => r.click_rate), line: { color: ACCENT, width: 2 } },
+      { type: "scatter", mode: "lines", name: "Click-to-open", x: days,
+        y: daily.map(r => r.ctor), line: { color: WARN, width: 2, dash: "dot" } },
+    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.15, x: 0 },
+                yaxis: { ticksuffix: "%", gridcolor: "#f3f4f6",
+                         tickfont: { color: "#6b7280", size: mFontSz }, automargin: true } }), config);
+
+    const grp = wk => {
+      const rows = daily.filter(r => r.is_weekend === wk);
+      const g = k => rows.reduce((s, r) => s + Number(r[k] || 0), 0);
+      const d = g("delivered"), o = g("unique_opens"), c = g("unique_clicks");
+      return { sends: g("sends"), delivered: d, opens: o, clicks: c,
+               open: pct(o, d), click: pct(c, d), ctor: pct(o ? c : 0, o) };
+    };
+    const wd = grp(false), we = grp(true);
+    const row = (name, x) => `<tr><td>${name}</td>
+      <td class="num">${fmt(x.sends)}</td><td class="num">${fmt(x.delivered)}</td>
+      <td class="num">${x.open}%</td><td class="num">${x.click}%</td><td class="num">${x.ctor}%</td></tr>`;
+    document.getElementById("table-email-daytype").innerHTML =
+      `<table class="wkd-table"><thead><tr><th>Day type</th><th class="num">Sends</th>
+        <th class="num">Delivered</th><th class="num">Open</th><th class="num">Click</th>
+        <th class="num">C2O</th></tr></thead><tbody>
+        ${we.sends ? row("Weekend", we) : ""}${wd.sends ? row("Weekday", wd) : ""}</tbody></table>`;
+
+    document.getElementById("email-note").innerHTML =
+      `Send &amp; delivery counts are in the cards above; the chart tracks rates so it stays comparable as the audience grows. `
+      + `&ldquo;Suppressed&rdquo; = address on the spam-complaint list, so the send was skipped (not delivered). `
+      + `Open tracking undercounts on clients that block pixels, so treat open rate as a floor.`;
+  } catch (e) {
+    console.warn("email section failed:", e);
+    sub.innerHTML = '<span class="err">Email-reminder data failed to load.</span>';
+  }
 }
 
 load();

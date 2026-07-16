@@ -199,11 +199,10 @@
 <div class="kpis" id="email-kpis"></div>
 <div class="grid">
   <div class="card" style="grid-column: 1 / -1;">
-    <h3>Daily delivered, opens &amp; clicks</h3>
-    <div id="chart-email-trend" class="chart" style="height: 340px;"></div>
+    <h3>Open, click &amp; click-to-open rate over time</h3>
+    <div id="chart-email-rates" class="chart" style="height: 340px;"></div>
   </div>
-  <div class="card"><h3>Open, click &amp; click-to-open rate</h3><div id="chart-email-rates" class="chart"></div></div>
-  <div class="card"><h3>Weekday vs weekend</h3><div id="table-email-daytype"></div></div>
+  <div class="card" style="grid-column: 1 / -1;"><h3>Weekday vs weekend</h3><div id="table-email-daytype"></div></div>
 </div>
 <p id="email-note" style="font-size:12px;color:var(--muted);margin-top:8px;"></p>
 
@@ -951,7 +950,7 @@ async function loadEmail(fromVal, toVal) {
     if (!daily.length) {
       sub.textContent = "No reminder-email sends in this window.";
       document.getElementById("email-kpis").innerHTML = "";
-      ["chart-email-trend", "chart-email-rates"].forEach(id => Plotly.purge(id));
+      Plotly.purge("chart-email-rates");
       document.getElementById("table-email-daytype").innerHTML = "";
       return;
     }
@@ -976,15 +975,6 @@ async function loadEmail(fromVal, toVal) {
          <div class="sub">${k.sub}</div></div>`).join("");
 
     const days = daily.map(r => r.day);
-    Plotly.newPlot("chart-email-trend", [
-      { type: "bar", name: "Delivered", x: days, y: daily.map(r => r.delivered),
-        marker: { color: "#c7d2fe" } },
-      { type: "scatter", mode: "lines+markers", name: "Unique opens", x: days,
-        y: daily.map(r => r.unique_opens), line: { color: BRAND, width: 2 }, marker: { size: 4 } },
-      { type: "scatter", mode: "lines+markers", name: "Unique clicks", x: days,
-        y: daily.map(r => r.unique_clicks), line: { color: ACCENT, width: 2 }, marker: { size: 4 } },
-    ], layout({ showlegend: true, legend: { orientation: "h", y: 1.15, x: 0 } }), config);
-
     Plotly.newPlot("chart-email-rates", [
       { type: "scatter", mode: "lines", name: "Open rate", x: days,
         y: daily.map(r => r.open_rate), line: { color: BRAND, width: 2 } },
@@ -1014,7 +1004,8 @@ async function loadEmail(fromVal, toVal) {
         ${we.sends ? row("Weekend", we) : ""}${wd.sends ? row("Weekday", wd) : ""}</tbody></table>`;
 
     document.getElementById("email-note").innerHTML =
-      `&ldquo;Suppressed&rdquo; = address on the spam-complaint list, so the send was skipped (not delivered). `
+      `Send &amp; delivery counts are in the cards above; the chart tracks rates so it stays comparable as the audience grows. `
+      + `&ldquo;Suppressed&rdquo; = address on the spam-complaint list, so the send was skipped (not delivered). `
       + `Open tracking undercounts on clients that block pixels, so treat open rate as a floor.`;
   } catch (e) {
     console.warn("email section failed:", e);

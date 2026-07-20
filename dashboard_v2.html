@@ -298,12 +298,13 @@ const PROG_COLORS = {
 };
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h — caps Supabase requests to ~once/day regardless of how often the page reloads
+let BYPASS_CACHE = false; // set true by the Refresh button to force a live fetch (still refreshes the cache)
 
 async function api(view, q = "") {
   const cacheKey = `sb_cache:${view}?${q}`;
   try {
     const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
-    if (cached && Date.now() - cached.t < CACHE_TTL_MS) return cached.d;
+    if (!BYPASS_CACHE && cached && Date.now() - cached.t < CACHE_TTL_MS) return cached.d;
   } catch (e) {}
   const r = await fetch(`${URL_}/rest/v1/${view}?${q}`, { headers: HEADERS });
   if (!r.ok) throw new Error(`${view}: ${r.status} ${await r.text()}`);
@@ -972,7 +973,10 @@ async function load() {
   }
 }
 
-document.getElementById("refresh").addEventListener("click", load);
+document.getElementById("refresh").addEventListener("click", async () => {
+  BYPASS_CACHE = true;            // force a live fetch past the 24h cache
+  try { await load(); } finally { BYPASS_CACHE = false; }
+});
 document.getElementById("from").addEventListener("change", load);
 document.getElementById("to").addEventListener("change", load);
 document.getElementById("preset").addEventListener("change", e => {

@@ -228,6 +228,22 @@ function delta(cur, prev, pp = false) {
   return { text: `${arrow} ${sign}${val}`, cls, num: d };
 }
 
+/* Self-writing lead sentence: a metric's rank in the n-week range + its WoW
+   direction, composed from the data — never a hard-coded weekly story. */
+function leadStanding(subject, arr, key, last, prior, pp = false) {
+  const n  = arr.length;
+  const hi = rankDesc(arr, key, Number(last[key]));                          // 1 = highest
+  const lo = arr.filter(r => Number(r[key]) < Number(last[key])).length + 1; // 1 = lowest
+  const dir = delta(last[key], prior[key], pp).cls;                          // pos / neg / flat
+  if (hi === 1) return `<b>${subject} hit a ${n}-week high.</b>`;
+  if (lo === 1) return `<b>${subject} fell to a ${n}-week low.</b>`;
+  if (hi <= 3)  return `<b>${subject} had one of its strongest weeks in ${n} — ${ord(hi)}-highest.</b>`;
+  if (lo <= 3)  return `<b>${subject} ran near the bottom of its ${n}-week range.</b>`;
+  if (dir === "pos") return `<b>${subject} rose this week.</b>`;
+  if (dir === "neg") return `<b>${subject} eased this week.</b>`;
+  return `<b>${subject} held steady this week.</b>`;
+}
+
 /* ---------- SVG bar panel: one series, 12 weeks, focus week highlighted ---------- */
 function barPanel(rows, key, color, fmtVal) {
   const W = 340, H = 112, padL = 4, padR = 4, padT = 18, padB = 18;
@@ -328,34 +344,42 @@ function bottomLine(last, prior, tot, trend) {
     + `${reachSt.above ? "well above" : "below"} the ${n}-week average of ${fmt(Math.round(reachSt.avg))}`
     + `${reachSt.top ? `, the ${ord(reachSt.rank)}-strongest of the last ${n}` : ""}.`);
 
-  // 2. Content
+  // 2. Content — lead + standing both computed, so it can't contradict the numbers.
   const startSt = standing(trend, "starts", last.starts);
   const vsAll = Number(last.completion_pct) - Number(tot.completion_pct);
-  out.push(`<b>Content is at its strongest in ${n} weeks.</b> ${fmt(last.starts)} video starts — `
-    + `${startSt.rank === 1 ? `the highest of the last ${n}` : `${ord(startSt.rank)}-highest of the last ${n}`}, `
-    + `against an average of ${fmt(Math.round(startSt.avg))} — and ${Number(last.completion_pct).toFixed(1)}% were `
+  const startWhere = startSt.top
+    ? `${startSt.rank === 1 ? `the highest of the last ${n}` : `${ord(startSt.rank)}-highest of the last ${n}`}, against an average of ${fmt(Math.round(startSt.avg))}`
+    : `${startSt.above ? "above" : "below"} the ${n}-week average of ${fmt(Math.round(startSt.avg))}`;
+  out.push(`${leadStanding("Content", trend, "starts", last, prior)} `
+    + `${fmt(last.starts)} video starts — ${startWhere} — and ${Number(last.completion_pct).toFixed(1)}% were `
     + `watched to the end, ${Math.abs(vsAll).toFixed(1)} points ${vsAll >= 0 ? "above" : "below"} the all-time `
     + `average of ${Number(tot.completion_pct).toFixed(1)}%.`);
 
-  // 3. AI — the week-over-week drop is real but measured against the 12-week PEAK.
-  //    Reach and depth diverge here, so say so rather than lead with "−46%".
+  // 3. AI — lead + every directional word computed from the sign, so reach and
+  //    depth can diverge from volume without the sentence ever going stale.
   const aiUserSt  = standing(trend, "ai_users", last.ai_users);
   const adoptSt   = standing(trend, "ai_adoption_pct", last.ai_adoption_pct);
   const msgSt     = standing(trend, "ai_messages", last.ai_messages);
-  const priorWasPeak = rankDesc(trend, "ai_messages", prior.ai_messages) === 1;
   const perUserLast = Number(last.ai_users) > 0 ? Number(last.ai_messages) / Number(last.ai_users) : 0;
   const perUserAvg  = avgOf(trend.map(r => ({ v: Number(r.ai_users) > 0 ? Number(r.ai_messages) / Number(r.ai_users) : 0 })), "v");
 
-  const aiUsersUp = Number(last.ai_users) >= Number(prior.ai_users);
-  out.push(`<b>AI messages came back to our normal range after an unusually high week.</b> `
-    + `Volume (${fmt(last.ai_messages)}) eased from ${fmt(prior.ai_messages)}`
-    + `${priorWasPeak ? `, the busiest AI week of the last ${n}` : ""}, and sits `
+  const volDir   = delta(last.ai_messages, prior.ai_messages).cls;   // pos / neg / flat
+  const volWord  = volDir === "pos" ? "is up from" : volDir === "neg" ? "is down from" : "is level with";
+  const reachDir = delta(last.ai_users, prior.ai_users).cls;
+  const reachWord = reachDir === "pos" ? "<b>grew</b>" : reachDir === "neg" ? "slipped" : "held steady";
+  const reachConj = reachDir === "neg" ? "though" : reachDir === "pos" ? "with it" : "alongside";
+  const reachFrom = reachDir === "pos" ? "up from" : reachDir === "neg" ? "down from" : "vs.";
+  const puDiff = perUserLast - perUserAvg;
+  const depthWord = Math.abs(puDiff) < 0.75 ? "ran about their usual length"
+                  : puDiff > 0 ? "ran longer" : "ran shorter";
+  out.push(`${leadStanding("AI messages", trend, "ai_messages", last, prior)} `
+    + `Volume (${fmt(last.ai_messages)}) ${volWord} ${fmt(prior.ai_messages)}, and sits `
     + `${msgSt.above ? "above" : "near"} the ${n}-week average of ${fmt(Math.round(msgSt.avg))}. `
-    + `Reach ${aiUsersUp ? "<b>grew</b>" : "held"} even so: ${fmt(last.ai_users)} people sent a message`
+    + `Reach ${reachWord} ${reachConj}: ${fmt(last.ai_users)} people sent a message`
     + `${aiUserSt.top ? ` (${ord(aiUserSt.rank)}-highest in ${n} weeks)` : ""}, `
-    + `${aiUsersUp ? "up from" : "vs."} ${fmt(prior.ai_users)}, with ${Number(last.ai_adoption_pct).toFixed(1)}% adoption `
-    + `${adoptSt.above ? "above" : "below"} the ${adoptSt.avg.toFixed(1)}% average. Conversations ran shorter `
-    + `(${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)}).`);
+    + `${reachFrom} ${fmt(prior.ai_users)}, with ${Number(last.ai_adoption_pct).toFixed(1)}% adoption `
+    + `${adoptSt.above ? "above" : "below"} the ${adoptSt.avg.toFixed(1)}% average. Conversations `
+    + `${depthWord} (${perUserLast.toFixed(1)} messages per person vs. ${perUserAvg.toFixed(1)}).`);
   return out;
 }
 

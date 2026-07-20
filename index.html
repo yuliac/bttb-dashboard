@@ -41,6 +41,8 @@
     font-weight: 500;
   }
   button:hover { filter: brightness(1.05); }
+  button:active { transform: translateY(1px); }
+  button.refreshing { background: var(--accent); border-color: var(--accent); }
   button.ghost { background: white; color: var(--text); border-color: var(--border); }
   .kpis {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -854,9 +856,19 @@ async function load() {
   }
 }
 
-document.getElementById("refresh").addEventListener("click", async () => {
-  BYPASS_CACHE = true;            // force a live fetch past the 24h cache
-  try { await load(); } finally { BYPASS_CACHE = false; }
+document.getElementById("refresh").addEventListener("click", async (e) => {
+  const btn = e.currentTarget, label = btn.textContent, started = Date.now();
+  BYPASS_CACHE = true;               // force a live fetch past the 24h cache
+  btn.classList.add("refreshing");   // green flash confirms the click
+  btn.textContent = "Refreshing…";
+  try { await load(); }
+  finally {
+    BYPASS_CACHE = false;
+    setTimeout(() => {               // keep the state visible ≥350ms even on a fast fetch
+      btn.classList.remove("refreshing");
+      btn.textContent = label;
+    }, Math.max(0, 350 - (Date.now() - started)));
+  }
 });
 document.getElementById("from").addEventListener("change", load);
 document.getElementById("to").addEventListener("change", load);

@@ -156,14 +156,16 @@ def fetch_all_posts():
         offset+=len(batch)
         if not BACKFILL or len(batch)<100: break
     r=wix("/blog/v3/draft-posts/query",{"filter":{"status":{"$eq":"SCHEDULED"}},
-          "sort":[{"fieldName":"scheduledPublishDate","order":"ASC"}],"paging":{"limit":100}})
+          "sort":[{"fieldName":"scheduledPublishDate","order":"ASC"}],"paging":{"limit":100},
+          "fieldsets":["RICH_CONTENT"]})
     pub_slugs={p["slug"] for p in posts}
     for p in r.get("draftPosts",[]):
         d=p.get("scheduledPublishDate")
         if not d or p.get("slug") in pub_slugs: continue
         posts.append(dict(id=p.get("id"),title=p.get("title"),slug=p.get("slug"),memberId=p.get("memberId"),
             categoryIds=p.get("categoryIds") or [],tagIds=p.get("tagIds") or [],
-            date=d,status="Scheduled",excerpt="",ttr=p.get("minutesToRead"),body=""))
+            date=d,status="Scheduled",excerpt=(p.get("excerpt") or "")[:900],ttr=p.get("minutesToRead"),
+            body=richtext_to_plain(p.get("richContent"))[:9000]))
     return posts
 
 def sync_posts(posts, catmap, authmap, tagmap):
